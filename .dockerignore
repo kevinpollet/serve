@@ -1,0 +1,6 @@
+*
+!cmd/
+!log/
+!*.go
+!go.mod
+!go.sum
