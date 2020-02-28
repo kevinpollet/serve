@@ -2,26 +2,34 @@ package main
 
 import (
 	"flag"
-	"net/http"
 
 	"github.com/kevinpollet/serge"
 	"github.com/kevinpollet/serge/log"
 )
 
-func main() {
-	hostPtr := flag.String("host", serge.DefaultHost, "the server host")
-	portPtr := flag.Int("port", serge.DefaultPort, "the server port")
-	dirPtr := flag.String("dir", serge.DefaultDir, "the directory to serve")
+var port int
+var host, dir, cert, key string
 
+func init() {
+	flag.IntVar(&port, "port", serge.DefaultPort, "the port to serve")
+	flag.StringVar(&host, "host", serge.DefaultHost, "the server host")
+	flag.StringVar(&dir, "dir", serge.DefaultDir, "the directory to serve")
+	flag.StringVar(&cert, "cert", "", "the TLS certificate")
+	flag.StringVar(&key, "key", "", "the TLS key")
+}
+
+func main() {
 	flag.Parse()
 
 	server := serge.NewFileServer(
-		serge.Host(*hostPtr),
-		serge.Port(*portPtr),
-		serge.Dir(*dirPtr),
+		serge.Host(host),
+		serge.Port(port),
+		serge.Dir(dir),
 	)
 
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		log.Logger().Fatal(err)
+	if len(cert) > 0 && len(key) > 0 {
+		log.Logger().Fatal(server.ListenAndServeTLS(cert, key))
 	}
+
+	log.Logger().Fatal(server.ListenAndServe())
 }
