@@ -6,6 +6,16 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/serge)](./LICENSE.md)
 
+## Contributing
+
+Contributions are welcome!
+
+Want to file a bug, request a feature or contribute some code?
+
+- Check out the [Code of Conduct](./CODE_OF_CONDUCT.md).
+- Check if there is an existing issue corresponding to your bug or feature request.
+- Open an issue to discuss your bug or feature.
+
 ## License
 
 [MIT](./LICENSE.md)
