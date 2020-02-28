@@ -38,3 +38,8 @@ func (fs *FileServer) ListenAndServe() error {
 	log.Logger().Infof("server is listening on: %s", fs.server.Addr)
 	return fs.server.ListenAndServe()
 }
+
+func (fs *FileServer) ListenAndServeTLS(certFile, keyFile string) error {
+	log.Logger().Infof("TLS server is listening on: %s", fs.server.Addr)
+	return fs.server.ListenAndServeTLS(certFile, keyFile)
+}
