@@ -3,6 +3,9 @@ package serge
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/justinas/alice"
@@ -14,6 +17,23 @@ const (
 	DefaultPort = 8080
 	DefaultDir  = "."
 )
+
+type dir string
+
+func (d dir) Open(name string) (http.File, error) {
+	fullName := filepath.Join(string(d), filepath.FromSlash(name))
+
+	if strings.HasPrefix(filepath.Base(fullName), ".") {
+		return nil, os.ErrNotExist
+	}
+
+	file, err := os.Open(fullName)
+	if err != nil {
+		return nil, err
+	}
+
+	return file, nil
+}
 
 type FileServer struct {
 	host        string
@@ -34,7 +54,7 @@ func NewFileServer(options ...fileServerOption) *FileServer {
 		Addr:         fmt.Sprintf("%s:%d", fs.host, fs.port),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      alice.New(fs.middlewares...).Then(http.FileServer(http.Dir(fs.dir))),
+		Handler:      alice.New(fs.middlewares...).Then(http.FileServer(dir(fs.dir))),
 	}
 
 	return fs

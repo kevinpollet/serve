@@ -7,16 +7,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var rootLogger *logrus.Logger
+var root *logrus.Logger
 
 func init() {
-	rootLogger = logrus.New()
+	root = logrus.New()
 
-	rootLogger.SetOutput(os.Stdout)
-	rootLogger.SetFormatter(&logrus.JSONFormatter{})
-	log.SetOutput(rootLogger.Writer())
+	root.SetOutput(os.Stdout)
+	root.SetFormatter(&logrus.JSONFormatter{})
+	log.SetOutput(root.Writer())
 }
 
 func Logger() logrus.FieldLogger {
-	return rootLogger
+	return root
 }
