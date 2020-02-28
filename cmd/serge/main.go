@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-
 	server := serge.NewFileServer(
-		serge.Address("0.0.0.0:8080"),
+		serge.Host("0.0.0.0"),
+		serge.Port(8080),
 		serge.Dir("examples/hello"),
 		serge.Middlewares(serge.BasicAuth("user", "pass")),
 	)

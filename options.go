@@ -4,9 +4,15 @@ import "github.com/justinas/alice"
 
 type fileServerOption func(*FileServer)
 
-func Address(address string) fileServerOption {
+func Host(host string) fileServerOption {
 	return func(fs *FileServer) {
-		fs.addr = address
+		fs.host = host
+	}
+}
+
+func Port(port int) fileServerOption {
+	return func(fs *FileServer) {
+		fs.port = port
 	}
 }
 

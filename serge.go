@@ -1,6 +1,7 @@
 package serge
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -9,21 +10,22 @@ import (
 )
 
 type FileServer struct {
-	addr        string
+	host        string
+	port        int
 	dir         string
 	middlewares []alice.Constructor
 	server      *http.Server
 }
 
 func NewFileServer(options ...fileServerOption) *FileServer {
-	fs := &FileServer{addr: "127.0.0.1:8080", dir: "."}
+	fs := &FileServer{host: "127.0.0.1", port: 8080, dir: "."}
 
 	for _, optionSetter := range options {
 		optionSetter(fs)
 	}
 
 	fs.server = &http.Server{
-		Addr:         fs.addr,
+		Addr:         fmt.Sprintf("%s:%d", fs.host, fs.port),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		Handler:      alice.New(fs.middlewares...).Then(http.FileServer(http.Dir(fs.dir))),
