@@ -9,6 +9,12 @@ import (
 	"github.com/kevinpollet/serge/log"
 )
 
+const (
+	DefaultHost = "127.0.0.1"
+	DefaultPort = 8080
+	DefaultDir  = "."
+)
+
 type FileServer struct {
 	host        string
 	port        int
@@ -18,7 +24,7 @@ type FileServer struct {
 }
 
 func NewFileServer(options ...fileServerOption) *FileServer {
-	fs := &FileServer{host: "127.0.0.1", port: 8080, dir: "."}
+	fs := &FileServer{host: DefaultHost, port: DefaultPort, dir: DefaultDir}
 
 	for _, optionSetter := range options {
 		optionSetter(fs)
