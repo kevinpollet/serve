@@ -1,11 +1,9 @@
 package serge
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/kevinpollet/serge/log"
@@ -21,7 +19,6 @@ func NewFileServer(dir string) http.Handler {
 
 func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	urlPath := path.Clean(req.URL.Path)
-	fmt.Println(urlPath)
 
 	file, err := fs.root.Open(urlPath)
 	if err != nil {
@@ -49,7 +46,12 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.ServeContent(rw, req, filepath.Base(urlPath), fileInfo.ModTime(), file)
+	if strings.HasPrefix(fileInfo.Name(), ".") {
+		toHTTPResponse(rw, os.ErrNotExist)
+		return
+	}
+
+	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
 }
 
 func toHTTPResponse(rw http.ResponseWriter, err error) {
