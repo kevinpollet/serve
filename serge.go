@@ -1,8 +1,8 @@
 package serge
 
 import (
+	"compress/flate"
 	"compress/gzip"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -11,14 +11,7 @@ import (
 	"github.com/kevinpollet/serge/log"
 )
 
-type compressedResponseWriter struct {
-	io.Writer
-	http.ResponseWriter
-}
-
-func (c compressedResponseWriter) Write(bytes []byte) (int, error) {
-	return c.Writer.Write(bytes)
-}
+const headerLocation = "Location"
 
 type fileServer struct {
 	root http.FileSystem
@@ -47,7 +40,7 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	if fileInfo.IsDir() {
 		if !strings.HasSuffix(req.URL.Path, "/") {
-			rw.Header().Add("Location", urlPath+"/")
+			rw.Header().Add(headerLocation, urlPath+"/")
 			rw.WriteHeader(http.StatusMovedPermanently)
 		} else {
 			req.URL.Path = urlPath + "/index.html"
@@ -62,19 +55,29 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	contentEncoding, err := negotiateContentEncoding(req, "gzip", "identity")
+	contentEncoding, err := negotiateContentEncoding(
+		req,
+		encodingGzip, encodingDeflate, encodingIdentity,
+	)
 	if err != nil {
 		toHTTPResponse(rw, err)
 		return
 	}
 
-	rw.Header().Add("Content-Encoding", contentEncoding)
+	rw.Header().Add(headerContentEncoding, contentEncoding)
 
-	if contentEncoding == "gzip" {
+	switch contentEncoding {
+	case encodingGzip:
 		gzipWriter := gzip.NewWriter(rw)
 		defer gzipWriter.Close()
 
-		rw = compressedResponseWriter{gzipWriter, rw}
+		rw = &encodedResponseWriter{gzipWriter, rw}
+
+	case encodingDeflate:
+		flateWriter, _ := flate.NewWriter(rw, flate.DefaultCompression)
+		defer flateWriter.Close()
+
+		rw = &encodedResponseWriter{flateWriter, rw}
 	}
 
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
