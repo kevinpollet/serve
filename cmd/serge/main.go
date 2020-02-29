@@ -10,13 +10,21 @@ import (
 	"github.com/kevinpollet/serge/log"
 )
 
-var port int
-var host, dir, cert, key string
+const (
+	defaultDir  = "."
+	defaultHost = "127.0.0.1"
+	defaultPort = 8080
+)
+
+var (
+	port                 int
+	host, dir, cert, key string
+)
 
 func init() {
-	flag.IntVar(&port, "port", 8080, "the port to serve")
-	flag.StringVar(&host, "host", "127.0.0.1", "the server host")
-	flag.StringVar(&dir, "dir", ".", "the directory to serve")
+	flag.IntVar(&port, "port", defaultPort, "the port to serve")
+	flag.StringVar(&host, "host", defaultHost, "the server host")
+	flag.StringVar(&dir, "dir", defaultDir, "the directory to serve")
 	flag.StringVar(&cert, "cert", "", "the TLS certificate")
 	flag.StringVar(&key, "key", "", "the TLS key")
 }
