@@ -4,66 +4,64 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/kevinpollet/serge/log"
 )
 
-const (
-	DefaultDir  = "."
-	DefaultHost = "127.0.0.1"
-	DefaultPort = 8080
-)
+type fileServer struct {
+	root http.FileSystem
+}
 
-type dir string
+func NewFileServer(dir string) http.Handler {
+	return &fileServer{root: http.Dir(dir)}
+}
 
-func (d dir) Open(name string) (http.File, error) {
-	fullName := filepath.Join(string(d), filepath.FromSlash(name))
+func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	urlPath := path.Clean(req.URL.Path)
+	fmt.Println(urlPath)
 
-	if strings.HasPrefix(filepath.Base(fullName), ".") {
-		return nil, os.ErrNotExist
-	}
-
-	file, err := os.Open(fullName)
+	file, err := fs.root.Open(urlPath)
 	if err != nil {
-		return nil, err
+		toHTTPResponse(rw, err)
+		return
 	}
 
-	return file, nil
-}
+	defer file.Close()
 
-type FileServer struct {
-	host   string
-	port   int
-	dir    string
-	server *http.Server
-}
-
-func NewFileServer(options ...fileServerOption) *FileServer {
-	fs := &FileServer{host: DefaultHost, port: DefaultPort, dir: DefaultDir}
-
-	for _, optionSetter := range options {
-		optionSetter(fs)
+	fileInfo, err := file.Stat()
+	if err != nil {
+		toHTTPResponse(rw, err)
+		return
 	}
 
-	fs.server = &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", fs.host, fs.port),
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		Handler:      http.FileServer(dir(fs.dir)),
+	if fileInfo.IsDir() {
+		if !strings.HasSuffix(req.URL.Path, "/") {
+			rw.Header().Add("Location", urlPath+"/")
+			rw.WriteHeader(http.StatusMovedPermanently)
+		} else {
+			req.URL.Path = urlPath + "/index.html"
+			fs.ServeHTTP(rw, req)
+		}
+
+		return
 	}
 
-	return fs
+	http.ServeContent(rw, req, filepath.Base(urlPath), fileInfo.ModTime(), file)
 }
 
-func (fs *FileServer) ListenAndServe() error {
-	log.Logger().Infof("server is listening on: %s", fs.server.Addr)
-	return fs.server.ListenAndServe()
-}
+func toHTTPResponse(rw http.ResponseWriter, err error) {
+	switch {
+	case os.IsNotExist(err):
+		rw.WriteHeader(http.StatusNotFound)
 
-func (fs *FileServer) ListenAndServeTLS(certFile, keyFile string) error {
-	log.Logger().Infof("TLS server is listening on: %s", fs.server.Addr)
-	return fs.server.ListenAndServeTLS(certFile, keyFile)
+	case os.IsPermission(err):
+		rw.WriteHeader(http.StatusForbidden)
+
+	default:
+		log.Logger().Error(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+	}
 }
