@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/justinas/alice"
 	"github.com/kevinpollet/serge/log"
 )
 
@@ -36,11 +35,10 @@ func (d dir) Open(name string) (http.File, error) {
 }
 
 type FileServer struct {
-	host        string
-	port        int
-	dir         string
-	middlewares []alice.Constructor
-	server      *http.Server
+	host   string
+	port   int
+	dir    string
+	server *http.Server
 }
 
 func NewFileServer(options ...fileServerOption) *FileServer {
@@ -54,7 +52,7 @@ func NewFileServer(options ...fileServerOption) *FileServer {
 		Addr:         fmt.Sprintf("%s:%d", fs.host, fs.port),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      alice.New(fs.middlewares...).Then(http.FileServer(dir(fs.dir))),
+		Handler:      http.FileServer(dir(fs.dir)),
 	}
 
 	return fs
