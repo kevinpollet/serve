@@ -1,6 +1,8 @@
 package serge
 
 import (
+	"compress/gzip"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -8,6 +10,15 @@ import (
 
 	"github.com/kevinpollet/serge/log"
 )
+
+type compressedResponseWriter struct {
+	io.Writer
+	http.ResponseWriter
+}
+
+func (c compressedResponseWriter) Write(bytes []byte) (int, error) {
+	return c.Writer.Write(bytes)
+}
 
 type fileServer struct {
 	root http.FileSystem
@@ -49,6 +60,21 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	if strings.HasPrefix(fileInfo.Name(), ".") {
 		toHTTPResponse(rw, os.ErrNotExist)
 		return
+	}
+
+	contentEncoding, err := negotiateContentEncoding(req, "gzip", "identity")
+	if err != nil {
+		toHTTPResponse(rw, err)
+		return
+	}
+
+	rw.Header().Add("Content-Encoding", contentEncoding)
+
+	if contentEncoding == "gzip" {
+		gzipWriter := gzip.NewWriter(rw)
+		defer gzipWriter.Close()
+
+		rw = compressedResponseWriter{gzipWriter, rw}
 	}
 
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
