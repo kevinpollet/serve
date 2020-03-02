@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const headerWWWAuthenticate = "WWW-Authenticate"
-
 type basicAuthHandler struct {
 	credentials map[string][]byte
 	next        http.Handler
@@ -31,7 +29,7 @@ func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) 
 	user, pass, hasAuth := req.BasicAuth()
 
 	if !hasAuth {
-		rw.Header().Add(headerWWWAuthenticate, "Basic realm=\"serge\"")
+		rw.Header().Add("WWW-Authenticate", "Basic realm=\"serge\"")
 		rw.WriteHeader(http.StatusUnauthorized)
 
 		return

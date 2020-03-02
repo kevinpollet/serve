@@ -34,7 +34,7 @@ type fileServer struct {
 }
 
 func NewFileServer(dir string) http.Handler {
-	return &fileServer{fileSystem: fileSystem(dir)}
+	return &fileServer{fileSystem(dir)}
 }
 
 func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
