@@ -40,7 +40,7 @@ func NewFileServer(dir string) http.Handler {
 func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	indexPageName := "index.html"
 	urlPath := path.Clean(req.URL.Path)
-	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate, encodingIdentity}
+	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
 
 	file, err := server.fileSystem.Open(urlPath)
 	if err != nil {

@@ -48,36 +48,50 @@ func (rw *responseWriterEncoder) Write(bytes []byte) (int, error) {
 	return rw.WriteCloser.Write(bytes)
 }
 
+type acceptEncoding map[string]float64
+
+func (m acceptEncoding) qvalue(encoding string) (float64, bool) {
+	qvalue, exists := m[encoding]
+	if !exists {
+		qvalue, exists = m["*"]
+	}
+
+	return qvalue, exists
+}
+
 func negotiateContentEncoding(req *http.Request, contentEncodings ...string) (string, error) {
 	bestEncoding := ""
-	bestEncodingQvalue := 0.0
+	bestQvalue := 0.0
 
-	acceptEncodings, err := parseAcceptEncoding(req)
+	acceptEncoding, err := parseAcceptEncoding(req)
 	if err != nil {
 		return "", err
 	}
 
 	for _, contentEncoding := range contentEncodings {
-		qvalue, exists := acceptEncodings[contentEncoding]
-		if !exists {
-			qvalue = acceptEncodings["*"]
-		}
+		qvalue, exists := acceptEncoding.qvalue(contentEncoding)
 
-		if qvalue > bestEncodingQvalue {
+		if exists && qvalue > bestQvalue {
 			bestEncoding = contentEncoding
-			bestEncodingQvalue = qvalue
+			bestQvalue = qvalue
+		}
+	}
+
+	if bestEncoding == "" {
+		qvalue, exists := acceptEncoding.qvalue(encodingIdentity)
+		if qvalue != 0.0 || !exists {
+			bestEncoding = encodingIdentity
 		}
 	}
 
 	return bestEncoding, nil
 }
 
-func parseAcceptEncoding(req *http.Request) (map[string]float64, error) {
+func parseAcceptEncoding(req *http.Request) (acceptEncoding, error) {
 	encodings := make(map[string]float64)
 	acceptEncoding := req.Header.Get("Accept-Encoding")
 
 	if acceptEncoding == "" {
-		encodings[encodingIdentity] = 1.0
 		return encodings, nil
 	}
 
