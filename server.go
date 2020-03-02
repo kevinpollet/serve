@@ -1,8 +1,6 @@
 package serge
 
 import (
-	"compress/flate"
-	"compress/gzip"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/andybalholm/brotli"
 	"github.com/kevinpollet/serge/log"
 )
 
@@ -80,24 +77,15 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	rw.Header().Add("Content-Encoding", contentEncoding)
 
-	switch contentEncoding {
-	case encodingBrotli:
-		brotliWriter := brotli.NewWriter(rw)
-		defer brotliWriter.Close()
+	if contentEncoding != "" && contentEncoding != encodingIdentity {
+		rwEncoder, err := newResponseWriterEncoder(contentEncoding, rw)
+		if err != nil {
+			toResponse(rw, err)
+			return
+		}
 
-		rw = &encodedResponseWriter{brotliWriter, rw}
-
-	case encodingGzip:
-		gzipWriter := gzip.NewWriter(rw)
-		defer gzipWriter.Close()
-
-		rw = &encodedResponseWriter{gzipWriter, rw}
-
-	case encodingDeflate:
-		flateWriter, _ := flate.NewWriter(rw, flate.DefaultCompression)
-		defer flateWriter.Close()
-
-		rw = &encodedResponseWriter{flateWriter, rw}
+		rw = rwEncoder
+		defer rwEncoder.Close()
 	}
 
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)

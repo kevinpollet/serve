@@ -1,10 +1,15 @@
 package serge
 
 import (
+	"compress/flate"
+	"compress/gzip"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/andybalholm/brotli"
 )
 
 const (
@@ -14,13 +19,33 @@ const (
 	encodingIdentity = "identity"
 )
 
-type encodedResponseWriter struct {
-	io.Writer
+type responseWriterEncoder struct {
+	io.WriteCloser
 	http.ResponseWriter
 }
 
-func (rw *encodedResponseWriter) Write(bytes []byte) (int, error) {
-	return rw.Writer.Write(bytes)
+func newResponseWriterEncoder(encoding string, rw http.ResponseWriter) (*responseWriterEncoder, error) {
+	switch encoding {
+	case encodingBrotli:
+		return &responseWriterEncoder{brotli.NewWriter(rw), rw}, nil
+
+	case encodingGzip:
+		return &responseWriterEncoder{gzip.NewWriter(rw), rw}, nil
+
+	case encodingDeflate:
+		writer, err := flate.NewWriter(rw, flate.DefaultCompression)
+		if err != nil {
+			return nil, err
+		}
+
+		return &responseWriterEncoder{writer, rw}, nil
+	}
+
+	return nil, fmt.Errorf("unsupported encoding: %s", encoding)
+}
+
+func (rw *responseWriterEncoder) Write(bytes []byte) (int, error) {
+	return rw.WriteCloser.Write(bytes)
 }
 
 func negotiateContentEncoding(req *http.Request, offers ...string) (string, error) {
