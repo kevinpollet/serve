@@ -60,7 +60,7 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	if fileInfo.IsDir() {
 		if !strings.HasSuffix(req.URL.Path, "/") {
-			redirect(rw, fmt.Sprint(req.URL.Path, "/"))
+			relRedirect(rw, req, fmt.Sprint(req.URL.Path, "/"))
 		} else {
 			req.URL.Path = fmt.Sprintf("%s/%s", urlPath, indexPageName)
 			server.ServeHTTP(rw, req)
@@ -103,8 +103,13 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
 }
 
-func redirect(rw http.ResponseWriter, path string) {
-	rw.Header().Add("Location", path)
+func relRedirect(rw http.ResponseWriter, req *http.Request, relPath string) {
+	query := req.URL.RawQuery
+	if query != "" {
+		relPath += fmt.Sprint("?", query)
+	}
+
+	rw.Header().Add("Location", relPath)
 	rw.WriteHeader(http.StatusMovedPermanently)
 }
 
