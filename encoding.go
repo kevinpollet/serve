@@ -12,9 +12,6 @@ const (
 	encodingDeflate  = "deflate"
 	encodingGzip     = "gzip"
 	encodingIdentity = "identity"
-
-	headerAcceptEncoding  = "Accept-Encoding"
-	headerContentEncoding = "Content-Encoding"
 )
 
 type encodedResponseWriter struct {
@@ -52,7 +49,7 @@ func negotiateContentEncoding(req *http.Request, offers ...string) (string, erro
 
 func parseAcceptEncodingHeader(req *http.Request) (map[string]float32, error) {
 	acceptedEncodings := make(map[string]float32)
-	acceptEncodingValue := req.Header.Get(headerAcceptEncoding)
+	acceptEncodingValue := req.Header.Get("Accept-Encoding")
 
 	if len(acceptEncodingValue) == 0 {
 		acceptedEncodings["*"] = float32(1.0)

@@ -78,7 +78,7 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rw.Header().Add(headerContentEncoding, contentEncoding)
+	rw.Header().Add("Content-Encoding", contentEncoding)
 
 	switch contentEncoding {
 	case encodingBrotli:
