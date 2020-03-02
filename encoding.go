@@ -48,54 +48,55 @@ func (rw *responseWriterEncoder) Write(bytes []byte) (int, error) {
 	return rw.WriteCloser.Write(bytes)
 }
 
-func negotiateContentEncoding(req *http.Request, offers ...string) (string, error) {
+func negotiateContentEncoding(req *http.Request, contentEncodings ...string) (string, error) {
 	bestEncoding := ""
-	bestEncodingWeight := float32(0.0)
+	bestEncodingQvalue := 0.0
 
-	acceptedEncodings, err := parseAcceptEncodingHeader(req)
+	acceptEncodings, err := parseAcceptEncoding(req)
 	if err != nil {
 		return "", err
 	}
 
-	for _, offer := range offers {
-		weight, exists := acceptedEncodings[offer]
+	for _, contentEncoding := range contentEncodings {
+		qvalue, exists := acceptEncodings[contentEncoding]
 		if !exists {
-			weight, exists = acceptedEncodings["*"]
+			qvalue = acceptEncodings["*"]
 		}
 
-		if exists && weight > bestEncodingWeight {
-			bestEncoding = offer
-			bestEncodingWeight = weight
+		if qvalue > bestEncodingQvalue {
+			bestEncoding = contentEncoding
+			bestEncodingQvalue = qvalue
 		}
 	}
 
 	return bestEncoding, nil
 }
 
-func parseAcceptEncodingHeader(req *http.Request) (map[string]float32, error) {
-	acceptedEncodings := make(map[string]float32)
-	acceptEncodingValue := req.Header.Get("Accept-Encoding")
+func parseAcceptEncoding(req *http.Request) (map[string]float64, error) {
+	encodings := make(map[string]float64)
+	acceptEncoding := req.Header.Get("Accept-Encoding")
 
-	if len(acceptEncodingValue) == 0 {
-		acceptedEncodings["*"] = float32(1.0)
-		return acceptedEncodings, nil
+	if acceptEncoding == "" {
+		encodings[encodingIdentity] = 1.0
+		return encodings, nil
 	}
 
-	for _, acceptedEncoding := range strings.Split(acceptEncodingValue, ",") {
-		q := 1.0
-		parts := strings.Split(strings.TrimSpace(acceptedEncoding), ";q=")
+	for _, encoding := range strings.Split(acceptEncoding, ",") {
+		qValue := 1.0
+		trimedEncoding := strings.TrimSpace(encoding)
+		parts := strings.Split(trimedEncoding, ";q=")
 
 		if len(parts) == 2 {
-			parsedQ, err := strconv.ParseFloat(parts[1], 32)
+			parsedQValue, err := strconv.ParseFloat(parts[1], 32)
 			if err != nil {
-				return acceptedEncodings, err
+				return nil, err
 			}
 
-			q = parsedQ
+			qValue = parsedQValue
 		}
 
-		acceptedEncodings[parts[0]] = float32(q)
+		encodings[parts[0]] = qValue
 	}
 
-	return acceptedEncodings, nil
+	return encodings, nil
 }

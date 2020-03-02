@@ -40,6 +40,7 @@ func NewFileServer(dir string) http.Handler {
 func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	indexPageName := "index.html"
 	urlPath := path.Clean(req.URL.Path)
+	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate, encodingIdentity}
 
 	file, err := server.fileSystem.Open(urlPath)
 	if err != nil {
@@ -66,18 +67,18 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	contentEncoding, err := negotiateContentEncoding(
-		req,
-		encodingBrotli, encodingGzip, encodingDeflate, encodingIdentity,
-	)
+	contentEncoding, err := negotiateContentEncoding(req, contentEncodings...)
 	if err != nil {
 		toResponse(rw, err)
 		return
 	}
 
-	rw.Header().Add("Content-Encoding", contentEncoding)
+	if contentEncoding == "" {
+		rw.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
 
-	if contentEncoding != "" && contentEncoding != encodingIdentity {
+	if contentEncoding != encodingIdentity {
 		rwEncoder, err := newResponseWriterEncoder(contentEncoding, rw)
 		if err != nil {
 			toResponse(rw, err)
@@ -87,6 +88,8 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		rw = rwEncoder
 		defer rwEncoder.Close()
 	}
+
+	rw.Header().Add("Content-Encoding", contentEncoding)
 
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
 }
