@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	encodingGzip     = "gzip"
+	encodingBrotli   = "br"
 	encodingDeflate  = "deflate"
+	encodingGzip     = "gzip"
 	encodingIdentity = "identity"
 
 	headerAcceptEncoding  = "Accept-Encoding"
@@ -60,7 +61,7 @@ func parseAcceptEncodingHeader(req *http.Request) (map[string]float32, error) {
 
 	for _, acceptedEncoding := range strings.Split(acceptEncodingValue, ",") {
 		q := 1.0
-		parts := strings.Split(acceptedEncoding, ";q=")
+		parts := strings.Split(strings.TrimSpace(acceptedEncoding), ";q=")
 
 		if len(parts) == 2 {
 			parsedQ, err := strconv.ParseFloat(parts[1], 32)

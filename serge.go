@@ -8,6 +8,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/andybalholm/brotli"
 	"github.com/kevinpollet/serge/log"
 )
 
@@ -21,7 +22,7 @@ func NewFileServer(dir string) http.Handler {
 	return &fileServer{root: http.Dir(dir)}
 }
 
-func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { // nolint
 	urlPath := path.Clean(req.URL.Path)
 
 	file, err := fs.root.Open(urlPath)
@@ -57,7 +58,7 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	contentEncoding, err := negotiateContentEncoding(
 		req,
-		encodingGzip, encodingDeflate, encodingIdentity,
+		encodingBrotli, encodingGzip, encodingDeflate, encodingIdentity,
 	)
 	if err != nil {
 		toHTTPResponse(rw, err)
@@ -67,6 +68,12 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add(headerContentEncoding, contentEncoding)
 
 	switch contentEncoding {
+	case encodingBrotli:
+		brotliWriter := brotli.NewWriter(rw)
+		defer brotliWriter.Close()
+
+		rw = &encodedResponseWriter{brotliWriter, rw}
+
 	case encodingGzip:
 		gzipWriter := gzip.NewWriter(rw)
 		defer gzipWriter.Close()
