@@ -8,6 +8,8 @@
 
 **serge** is a simple, secure and modern HTTP server, written in [Go](https://go.dev/), that can be used to serve static sites, files or single-page applications with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your applications.
 
+> **This project is actively developed and at its early stages. Expect some breaking changes before its first stable release.**
+
 ## Install
 
 ```
