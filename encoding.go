@@ -77,11 +77,8 @@ func negotiateContentEncoding(req *http.Request, contentEncodings ...string) (st
 		}
 	}
 
-	if bestEncoding == "" {
-		qvalue, exists := acceptEncoding.qvalue(encodingIdentity)
-		if qvalue != 0.0 || !exists {
-			bestEncoding = encodingIdentity
-		}
+	if qvalue, exists := acceptEncoding.qvalue(encodingIdentity); bestEncoding == "" && (!exists || qvalue != 0.0) {
+		bestEncoding = encodingIdentity
 	}
 
 	return bestEncoding, nil
