@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -12,18 +11,17 @@ import (
 
 const (
 	defaultDir  = "."
-	defaultHost = "127.0.0.1"
-	defaultPort = 8080
+	defaultAddr = "127.0.0.1:8080"
 )
 
 var (
-	port                 int
-	host, dir, cert, key string
+	addr      string
+	dir       string
+	cert, key string
 )
 
 func init() {
-	flag.IntVar(&port, "port", defaultPort, "the port to serve")
-	flag.StringVar(&host, "host", defaultHost, "the server host")
+	flag.StringVar(&addr, "addr", defaultAddr, "the server listening address")
 	flag.StringVar(&dir, "dir", defaultDir, "the directory to serve")
 	flag.StringVar(&cert, "cert", "", "the TLS certificate")
 	flag.StringVar(&key, "key", "", "the TLS key")
@@ -33,7 +31,7 @@ func main() {
 	flag.Parse()
 
 	server := http.Server{
-		Addr:         fmt.Sprintf("%s:%d", host, port),
+		Addr:         addr,
 		Handler:      serge.NewFileServer(dir),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

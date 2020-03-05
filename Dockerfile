@@ -8,5 +8,6 @@ RUN go build -v -o /go/bin/serge cmd/serge/main.go
 FROM gcr.io/distroless/base
 COPY --chown=65534:65534 --from=builder /go/bin/serge .
 USER 65534
-ENTRYPOINT [ "./serge" ]
-CMD [ "--host", "0.0.0.0", "--dir", "/var/www" ]
+EXPOSE 8080
+ENTRYPOINT [ "./serge", "--addr", "0.0.0.0:8080" ]
+CMD [ "--dir", "/var/www" ]
