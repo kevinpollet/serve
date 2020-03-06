@@ -1,4 +1,4 @@
-# serge
+# serge <!-- omit in toc -->
 
 [![Build Status](https://github.com/kevinpollet/serge/workflows/build/badge.svg)](https://github.com/kevinpollet/serge/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/serge)](https://goreportcard.com/report/github.com/kevinpollet/serge)
@@ -6,11 +6,23 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/serge)](./LICENSE.md)
 
-**serge** is a simple, secure and modern HTTP server, written in [Go](https://go.dev/), that can be used to serve static sites, files or single-page applications with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your applications.
+**serge** is a simple, secure and modern HTTP server, written in [Go](https://go.dev/), that can be used to serve static sites, files or single-page applications. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **serge** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
 
-> **This project is actively developed and at its early stages. Expect some breaking changes before its first stable release.**
+- Programmatic API.
+- HTTP basic authentication.
+- Hide dot files by default.
+- Directory listing is disabled by default. 
+- Content encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
+
+## Table of Contents <!-- omit in toc -->
+
+- [Install](#install)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Install
+
+> This project is actively developed and at its early stages. Expect some breaking changes before its first release.
 
 ```
 go get -v github.com/kevinpollet/serge
