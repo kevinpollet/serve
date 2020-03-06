@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/justinas/alice"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,13 +17,17 @@ type basicAuthHandler struct {
 	next        http.Handler
 }
 
-func NewBasicAuthHandler(reader io.Reader, next http.Handler) (http.Handler, error) {
+func NewBasicAuthHandler(reader io.Reader) (alice.Constructor, error) {
 	credentials, err := parseCredentials(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	return &basicAuthHandler{credentials, next}, nil
+	handler := func(next http.Handler) http.Handler {
+		return &basicAuthHandler{credentials, next}
+	}
+
+	return handler, nil
 }
 
 func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {

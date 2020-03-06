@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/justinas/alice"
 	"github.com/kevinpollet/serge/log"
 )
 
@@ -33,16 +34,18 @@ type fileServer struct {
 	fileSystem http.FileSystem
 }
 
-func NewFileServer(dir string) http.Handler {
-	return &fileServer{fileSystem(dir)}
+func NewFileServer(dir string, middlewares ...alice.Constructor) http.Handler {
+	fs := &fileServer{fileSystem(dir)}
+
+	return alice.New(middlewares...).Then(fs)
 }
 
-func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	indexPageName := "index.html"
 	urlPath := path.Clean(req.URL.Path)
 	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
 
-	file, err := server.fileSystem.Open(urlPath)
+	file, err := fs.fileSystem.Open(urlPath)
 	if err != nil {
 		toResponse(rw, err)
 		return
@@ -61,7 +64,7 @@ func (server *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			relRedirect(rw, req, fmt.Sprint(req.URL.Path, "/"))
 		} else {
 			req.URL.Path = fmt.Sprintf("%s/%s", urlPath, indexPageName)
-			server.ServeHTTP(rw, req)
+			fs.ServeHTTP(rw, req)
 		}
 
 		return
