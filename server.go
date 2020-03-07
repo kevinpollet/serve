@@ -13,13 +13,19 @@ import (
 )
 
 type fileServer struct {
-	fileSystem http.FileSystem
+	fileSystem   http.FileSystem
+	middlewares  []alice.Constructor
+	errorHandler func(http.FileSystem, http.ResponseWriter, error)
 }
 
-func NewFileServer(dir string, middlewares ...alice.Constructor) http.Handler {
-	fs := &fileServer{dotFileHiddingFileSystem{http.Dir(dir)}}
+func NewFileServer(dir string, options ...fileServerOption) http.Handler {
+	fs := &fileServer{fileSystem: dotFileHiddingFileSystem{http.Dir(dir)}}
 
-	return alice.New(middlewares...).Then(fs)
+	for _, option := range options {
+		option(fs)
+	}
+
+	return alice.New(fs.middlewares...).Then(fs)
 }
 
 func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
@@ -82,6 +88,15 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (fs *fileServer) handleError(rw http.ResponseWriter, err error) {
+	if fs.errorHandler != nil {
+		fs.errorHandler(fs.fileSystem, rw, err)
+		return
+	}
+
+	defaultErrorHandler(fs.fileSystem, rw, err)
+}
+
+func defaultErrorHandler(fs http.FileSystem, rw http.ResponseWriter, err error) {
 	statusCode := http.StatusInternalServerError
 
 	if os.IsNotExist(err) || os.IsPermission(err) {
@@ -95,7 +110,7 @@ func (fs *fileServer) handleError(rw http.ResponseWriter, err error) {
 	rw.WriteHeader(statusCode)
 
 	errorPageName := fmt.Sprintf("%d.html", statusCode)
-	if file, err := fs.fileSystem.Open(errorPageName); err == nil {
+	if file, err := fs.Open(errorPageName); err == nil {
 		defer file.Close()
 		io.Copy(rw, file) //nolint
 	}

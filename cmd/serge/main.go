@@ -39,7 +39,7 @@ func main() {
 
 	server := http.Server{
 		Addr:         *addr,
-		Handler:      serge.NewFileServer(*dir, middlewares...),
+		Handler:      serge.NewFileServer(*dir, serge.Middlewares(middlewares...)),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
