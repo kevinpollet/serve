@@ -18,6 +18,7 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [Install](#install)
+- [Usage](#usage)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -28,6 +29,31 @@
 
 ```
 go get -v github.com/kevinpollet/serge
+```
+
+## Usage
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/kevinpollet/serge"
+)
+
+func main() {
+	http.Handle("/static", serge.NewFileServer("examples/hello",
+		serge.Middlewares(serge.NewStripPrefixHandler("/static")),
+		serge.ErrorHandler(func(fs http.FileSystem, rw http.ResponseWriter, err error) {
+			log.Print(err)
+			rw.WriteHeader(http.StatusInternalServerError)
+		}),
+	))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
 ```
 
 ## Examples
