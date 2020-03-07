@@ -18,6 +18,7 @@
 ## Table of Contents <!-- omit in toc -->
 
 - [Install](#install)
+- [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -28,6 +29,13 @@
 ```
 go get -v github.com/kevinpollet/serge
 ```
+
+## Examples
+
+The [examples](./examples) directory contains the following examples:
+
+- [hello](./examples/hello) — A simple static site that can be serve from the command-line.
+- [docker](./examples/docker) — A simple static site that can be serve from a docker container.
 
 ## Contributing
 
