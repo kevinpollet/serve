@@ -28,10 +28,15 @@ func NewFileServer(dir string, options ...fileServerOption) http.Handler {
 	return alice.New(fs.middlewares...).Then(fs)
 }
 
-func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { // nolint
 	indexPageName := "index.html"
 	urlPath := path.Clean(req.URL.Path)
 	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
+
+	if !strings.HasPrefix(req.URL.Path, "/") {
+		req.URL.Path = "/" + req.URL.Path
+		urlPath = path.Clean(req.URL.Path)
+	}
 
 	// negotiate content encoding
 	contentEncoding, err := negotiateContentEncoding(req, contentEncodings...)
