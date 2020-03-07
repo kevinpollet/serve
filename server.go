@@ -2,6 +2,7 @@ package serge
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path"
@@ -48,9 +49,35 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	urlPath := path.Clean(req.URL.Path)
 	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
 
+	// negotiate content encoding
+	contentEncoding, err := negotiateContentEncoding(req, contentEncodings...)
+	if err != nil {
+		fs.handleError(rw, err)
+		return
+	}
+
+	if contentEncoding == "" {
+		rw.WriteHeader(http.StatusNotAcceptable)
+		return
+	}
+
+	if contentEncoding != encodingIdentity {
+		rwEncoder, err := newResponseWriterEncoder(contentEncoding, rw)
+		if err != nil {
+			fs.handleError(rw, err)
+			return
+		}
+
+		rw = rwEncoder
+		defer rwEncoder.Close()
+	}
+
+	rw.Header().Add("Content-Encoding", contentEncoding)
+
+	// serve file
 	file, err := fs.fileSystem.Open(urlPath)
 	if err != nil {
-		toResponse(rw, err)
+		fs.handleError(rw, err)
 		return
 	}
 
@@ -58,7 +85,7 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 	fileInfo, err := file.Stat()
 	if err != nil {
-		toResponse(rw, err)
+		fs.handleError(rw, err)
 		return
 	}
 
@@ -73,31 +100,27 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	contentEncoding, err := negotiateContentEncoding(req, contentEncodings...)
-	if err != nil {
-		toResponse(rw, err)
-		return
-	}
-
-	if contentEncoding == "" {
-		rw.WriteHeader(http.StatusNotAcceptable)
-		return
-	}
-
-	if contentEncoding != encodingIdentity {
-		rwEncoder, err := newResponseWriterEncoder(contentEncoding, rw)
-		if err != nil {
-			toResponse(rw, err)
-			return
-		}
-
-		rw = rwEncoder
-		defer rwEncoder.Close()
-	}
-
-	rw.Header().Add("Content-Encoding", contentEncoding)
-
 	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
+}
+
+func (fs *fileServer) handleError(rw http.ResponseWriter, err error) {
+	statusCode := http.StatusInternalServerError
+
+	if os.IsNotExist(err) || os.IsPermission(err) {
+		statusCode = http.StatusNotFound
+	}
+
+	if statusCode == http.StatusInternalServerError {
+		log.Logger().Error(err)
+	}
+
+	rw.WriteHeader(statusCode)
+
+	errorPageName := fmt.Sprintf("%d.html", statusCode)
+	if file, err := fs.fileSystem.Open(errorPageName); err == nil {
+		defer file.Close()
+		io.Copy(rw, file) //nolint
+	}
 }
 
 func relRedirect(rw http.ResponseWriter, req *http.Request, relPath string) {
@@ -108,18 +131,4 @@ func relRedirect(rw http.ResponseWriter, req *http.Request, relPath string) {
 
 	rw.Header().Add("Location", relPath)
 	rw.WriteHeader(http.StatusMovedPermanently)
-}
-
-func toResponse(rw http.ResponseWriter, err error) {
-	switch {
-	case os.IsNotExist(err):
-		rw.WriteHeader(http.StatusNotFound)
-
-	case os.IsPermission(err):
-		rw.WriteHeader(http.StatusForbidden)
-
-	default:
-		log.Logger().Error(err)
-		rw.WriteHeader(http.StatusInternalServerError)
-	}
 }
