@@ -5,29 +5,32 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 
 	"github.com/justinas/alice"
 	"github.com/kevinpollet/serge/log"
 )
 
-type fileSystem string
+type dotFileHiddingFileSystem struct {
+	http.FileSystem
+}
 
-func (fs fileSystem) Open(name string) (http.File, error) {
-	rootDir := string(fs)
-	fullName := filepath.Join(rootDir, filepath.FromSlash(name))
-
-	if strings.HasPrefix(filepath.Base(fullName), ".") {
+func (df dotFileHiddingFileSystem) Open(name string) (http.File, error) {
+	if containsDotFile(name) {
 		return nil, os.ErrNotExist
 	}
 
-	file, err := os.Open(fullName)
-	if err != nil {
-		return nil, err
+	return df.FileSystem.Open(name)
+}
+
+func containsDotFile(name string) bool {
+	for _, file := range strings.Split(name, "/") {
+		if strings.HasPrefix(file, ".") {
+			return true
+		}
 	}
 
-	return file, nil
+	return false
 }
 
 type fileServer struct {
@@ -35,7 +38,7 @@ type fileServer struct {
 }
 
 func NewFileServer(dir string, middlewares ...alice.Constructor) http.Handler {
-	fs := &fileServer{fileSystem(dir)}
+	fs := &fileServer{dotFileHiddingFileSystem{http.Dir(dir)}}
 
 	return alice.New(middlewares...).Then(fs)
 }
