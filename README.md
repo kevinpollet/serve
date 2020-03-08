@@ -15,6 +15,12 @@
 - Directory listing is disabled by default. 
 - Content encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
+<hr/>
+
+**Disclaimer:** This project is actively developed and at its early stages. Expect some breaking changes before its first stable release.
+
+<hr/>
+
 ## Table of Contents <!-- omit in toc -->
 
 - [Install](#install)
@@ -24,8 +30,6 @@
 - [License](#license)
 
 ## Install
-
-> This project is actively developed and at its early stages. Expect some breaking changes before its first release.
 
 ```
 go get -v github.com/kevinpollet/serge
