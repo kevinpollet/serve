@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -11,23 +12,33 @@ import (
 	"github.com/kevinpollet/serge/log"
 )
 
-const (
-	defaultDir  = "."
-	defaultAddr = "127.0.0.1:8080"
+var (
+	flagAddr = flag.String("addr", "127.0.0.1:8080", "")
+	flagAuth = flag.String("auth", "", "")
+	flagDir  = flag.String("dir", ".", "")
+	flagCert = flag.String("cert", "", "")
+	flagKey  = flag.String("key", "", "")
 )
+
+const helpText = `serge [options]
+
+Options:
+-addr    The server address, "127.0.0.1:8080" by default.
+-auth    The basic auth credentials (password must be hashed with bcrypt and escaped with ''), e.g. hello:'$2y$12$...'
+-dir     The directory containing the files to serve, "." by default.
+-cert    The TLS certificate.
+-key     The TLS private key.
+-help    Prints this text.
+`
 
 func main() {
 	middlewares := make([]alice.Constructor, 0)
-	addr := flag.String("addr", defaultAddr, "the server listening address")
-	auth := flag.String("auth", "", "the basic auth credentials")
-	dir := flag.String("dir", defaultDir, "the directory to serve")
-	cert := flag.String("cert", "", "the TLS certificate")
-	key := flag.String("key", "", "the TLS key")
 
+	flag.Usage = help
 	flag.Parse()
 
-	if len(*auth) > 0 {
-		reader := strings.NewReader(*auth)
+	if len(*flagAuth) > 0 {
+		reader := strings.NewReader(*flagAuth)
 
 		basicAuthHandler, err := serge.NewBasicAuthHandler(reader)
 		if err != nil {
@@ -38,17 +49,21 @@ func main() {
 	}
 
 	server := http.Server{
-		Addr:         *addr,
-		Handler:      serge.NewFileServer(*dir, serge.Middlewares(middlewares...)),
+		Addr:         *flagAddr,
+		Handler:      serge.NewFileServer(*flagDir, serge.Middlewares(middlewares...)),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
 	log.Logger().Printf("server is listening on: %s", server.Addr)
 
-	if len(*cert) > 0 && len(*key) > 0 {
-		log.Logger().Fatal(server.ListenAndServeTLS(*cert, *key))
+	if len(*flagCert) > 0 && len(*flagKey) > 0 {
+		log.Logger().Fatal(server.ListenAndServeTLS(*flagCert, *flagKey))
 	}
 
 	log.Logger().Fatal(server.ListenAndServe())
+}
+
+func help() {
+	fmt.Println(helpText)
 }
