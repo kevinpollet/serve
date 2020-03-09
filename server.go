@@ -46,38 +46,10 @@ func NewFileServer(dir string, options ...Option) http.Handler {
 }
 
 func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
-
 	if !strings.HasPrefix(req.URL.Path, "/") {
 		req.URL.Path = "/" + req.URL.Path
 	}
 
-	// negotiate content encoding
-	contentEncoding, err := negotiateContentEncoding(req, contentEncodings...)
-	if err != nil {
-		fs.handleError(rw, err)
-		return
-	}
-
-	if contentEncoding == "" {
-		rw.WriteHeader(http.StatusNotAcceptable)
-		return
-	}
-
-	if contentEncoding != encodingIdentity {
-		rwEncoder, err := newResponseWriterEncoder(contentEncoding, rw)
-		if err != nil {
-			fs.handleError(rw, err)
-			return
-		}
-
-		rw = rwEncoder
-		defer rwEncoder.Close()
-	}
-
-	rw.Header().Add("Content-Encoding", contentEncoding)
-
-	// serve file
 	file, fileInfo, err := fs.fileSystem.OpenWithStat(path.Clean(req.URL.Path))
 	if err != nil {
 		fs.handleError(rw, err)

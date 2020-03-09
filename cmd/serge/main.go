@@ -49,6 +49,12 @@ func main() {
 		middlewares = append(middlewares, basicAuthHandler)
 	}
 
+	middlewares = append(middlewares, mddlw.NewNegotiateEncodingHandler(
+		mddlw.EncodingBrotli,
+		mddlw.EncodingGzip,
+		mddlw.EncodingDeflate,
+	))
+
 	server := http.Server{
 		Addr:         *flagAddr,
 		Handler:      serge.NewFileServer(*flagDir, serge.WithMiddlewares(middlewares...)),
