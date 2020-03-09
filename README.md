@@ -98,8 +98,8 @@ func main() {
 
 The [examples](./examples) directory contains the following examples:
 
-- [hello](./examples/hello) — A simple static site that can be serve from the command-line.
-- [docker](./examples/docker) — A simple static site that can be serve from a docker container.
+- [hello](./examples/hello) — A simple static site that can be served from the command-line.
+- [docker](./examples/docker) — A simple static site that can be served from a docker container.
 
 ## Contributing
 
