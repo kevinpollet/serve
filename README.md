@@ -19,6 +19,8 @@
 
 - [Install](#install)
 - [Usage](#usage)
+	- [Docker](#docker)
+	- [API](#api)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -31,6 +33,24 @@ go get -v github.com/kevinpollet/serge
 
 ## Usage
 
+### Docker
+
+An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/serge). The following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for TCP connections on `8080`.
+
+```
+FROM kevinpollet/serge:latest
+COPY . /var/www/
+```
+
+Then, you can build and run your Docker image with the following commands. Your static site or files will be available on http://localhost:8080.
+
+```shell
+docker build . -t moby:latest
+docker run -d -p 8080:8080 moby:latest
+```
+
+### API
+
 ```go
 package main
 
@@ -39,6 +59,7 @@ import (
 	"net/http"
 
 	"github.com/kevinpollet/serge"
+	"github.com/kevinpollet/serge/middlewares"
 )
 
 func main() {
@@ -49,7 +70,7 @@ func main() {
 
 	http.Handle("/static", serge.NewFileServer("examples/hello",
 		serge.WithAutoIndex(),
-		serge.WithMiddlewares(serge.NewStripPrefixHandler("/static")),
+		serge.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
 		serge.WithErrorHandler(customErrorHandler),
 	))
 
