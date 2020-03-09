@@ -13,7 +13,7 @@
 - Basic HTTP authentication.
 - Hide dot files by default.
 - Directory listing is disabled by default. 
-- Content encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
+- Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
 <hr/>
 
