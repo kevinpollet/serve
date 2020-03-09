@@ -20,9 +20,6 @@
 
 - [Install](#install)
 - [Usage](#usage)
-  - [Command-line](#command-line)
-  - [Docker](#docker)
-  - [API](#api)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -35,7 +32,7 @@ go get github.com/kevinpollet/serge
 
 ## Usage
 
-### Command-line
+### Command-line <!-- omit in toc -->
 
 **serge** can be use through its provided command-line. The following text is the output of the `serge -help` command.
 
@@ -52,7 +49,7 @@ Options:
 -help      Prints this text.
 ```
 
-### Docker
+### Docker <!-- omit in toc -->
 
 An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/serge). The following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for TCP connections on `8080`.
 
@@ -68,7 +65,7 @@ docker build . -t moby:latest
 docker run -d -p 8080:8080 moby:latest
 ```
 
-### API
+### API <!-- omit in toc -->
 
 ```go
 package main
