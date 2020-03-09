@@ -6,19 +6,45 @@ import (
 	"strings"
 )
 
-type dotFileHiddingFileSystem struct {
+type dotFileHidingFile struct {
+	http.File
+}
+
+func (f dotFileHidingFile) Readdir(n int) ([]os.FileInfo, error) {
+	files, err := f.File.Readdir(n)
+	if err != nil {
+		return nil, err
+	}
+
+	filteredFiles := make([]os.FileInfo, 0)
+
+	for _, file := range files {
+		if !strings.HasPrefix(file.Name(), ".") {
+			filteredFiles = append(filteredFiles, file)
+		}
+	}
+
+	return filteredFiles, nil
+}
+
+type dotFileHidingFileSystem struct {
 	http.FileSystem
 }
 
-func (fs dotFileHiddingFileSystem) Open(name string) (http.File, error) {
+func (fs dotFileHidingFileSystem) Open(name string) (http.File, error) {
 	if containsDotFile(name) {
 		return nil, os.ErrNotExist
 	}
 
-	return fs.FileSystem.Open(name)
+	file, err := fs.FileSystem.Open(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return dotFileHidingFile{file}, err
 }
 
-func (fs dotFileHiddingFileSystem) OpenWithStat(name string) (http.File, os.FileInfo, error) {
+func (fs dotFileHidingFileSystem) OpenWithStat(name string) (http.File, os.FileInfo, error) {
 	file, err := fs.Open(name)
 	if err != nil {
 		return nil, nil, err
@@ -29,7 +55,7 @@ func (fs dotFileHiddingFileSystem) OpenWithStat(name string) (http.File, os.File
 		return nil, nil, err
 	}
 
-	return file, fileInfo, nil
+	return dotFileHidingFile{file}, fileInfo, nil
 }
 
 func containsDotFile(name string) bool {

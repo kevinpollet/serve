@@ -15,14 +15,14 @@ import (
 type fileServer struct {
 	autoIndex    bool
 	errorHandler func(http.FileSystem, http.ResponseWriter, error)
-	fileSystem   dotFileHiddingFileSystem
+	fileSystem   dotFileHidingFileSystem
 	middlewares  []alice.Constructor
 }
 
 // NewFileServer returns a new handler instance that serves HTTP requests
 // with the contents of the given directory.
 func NewFileServer(dir string, options ...Option) http.Handler {
-	fs := &fileServer{fileSystem: dotFileHiddingFileSystem{http.Dir(dir)}}
+	fs := &fileServer{fileSystem: dotFileHidingFileSystem{http.Dir(dir)}}
 
 	for _, option := range options {
 		option(fs)
