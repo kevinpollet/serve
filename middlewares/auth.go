@@ -1,4 +1,4 @@
-package serge
+package middlewares
 
 import (
 	"bufio"

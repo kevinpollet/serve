@@ -10,6 +10,7 @@ import (
 	"github.com/justinas/alice"
 	"github.com/kevinpollet/serge"
 	"github.com/kevinpollet/serge/log"
+	mddlw "github.com/kevinpollet/serge/middlewares"
 )
 
 var (
@@ -39,8 +40,8 @@ func main() {
 
 	if len(*flagAuth) > 0 {
 		reader := strings.NewReader(*flagAuth)
+		basicAuthHandler, err := mddlw.NewBasicAuthHandler(reader)
 
-		basicAuthHandler, err := serge.NewBasicAuthHandler(reader)
 		if err != nil {
 			log.Logger().Fatal(err)
 		}
