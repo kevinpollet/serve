@@ -48,12 +48,14 @@ import (
 )
 
 func main() {
-	http.Handle("/static", serge.NewFileServer("examples/hello",
-		serge.Middlewares(serge.NewStripPrefixHandler("/static")),
-		serge.ErrorHandler(func(fs http.FileSystem, rw http.ResponseWriter, err error) {
+  customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
 			log.Print(err)
 			rw.WriteHeader(http.StatusInternalServerError)
-		}),
+  }
+
+	http.Handle("/static", serge.NewFileServer("examples/hello",
+		serge.WithMiddlewares(serge.NewStripPrefixHandler("/static")),
+		serge.WithErrorHandler(customErrorHandler),
 	))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

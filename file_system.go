@@ -10,12 +10,12 @@ type dotFileHiddingFileSystem struct {
 	http.FileSystem
 }
 
-func (df dotFileHiddingFileSystem) Open(name string) (http.File, error) {
+func (fs dotFileHiddingFileSystem) Open(name string) (http.File, error) {
 	if containsDotFile(name) {
 		return nil, os.ErrNotExist
 	}
 
-	return df.FileSystem.Open(name)
+	return fs.FileSystem.Open(name)
 }
 
 func containsDotFile(name string) bool {

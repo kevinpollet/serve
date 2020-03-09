@@ -50,7 +50,7 @@ func main() {
 
 	server := http.Server{
 		Addr:         *flagAddr,
-		Handler:      serge.NewFileServer(*flagDir, serge.Middlewares(middlewares...)),
+		Handler:      serge.NewFileServer(*flagDir, serge.WithMiddlewares(middlewares...)),
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}

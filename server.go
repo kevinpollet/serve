@@ -18,7 +18,9 @@ type fileServer struct {
 	errorHandler func(http.FileSystem, http.ResponseWriter, error)
 }
 
-func NewFileServer(dir string, options ...fileServerOption) http.Handler {
+// NewFileServer returns a new handler instance that serves HTTP requests
+// with the contents of the given directory.
+func NewFileServer(dir string, options ...Option) http.Handler {
 	fs := &fileServer{fileSystem: dotFileHiddingFileSystem{http.Dir(dir)}}
 
 	for _, option := range options {
@@ -28,8 +30,7 @@ func NewFileServer(dir string, options ...fileServerOption) http.Handler {
 	return alice.New(fs.middlewares...).Then(fs)
 }
 
-func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { // nolint
-	indexPageName := "index.html"
+func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	urlPath := path.Clean(req.URL.Path)
 	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
 
@@ -78,27 +79,38 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) { // 
 		return
 	}
 
-	if fileInfo.IsDir() {
-		if !strings.HasSuffix(req.URL.Path, "/") {
-			redirectTo(rw, req, fmt.Sprint(req.URL.Path, "/"))
-		} else {
-			req.URL.Path = fmt.Sprintf("%s/%s", urlPath, indexPageName)
-			fs.ServeHTTP(rw, req)
-		}
-
-		return
-	}
-
-	http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
+	fs.serveContent(rw, req, file, fileInfo)
 }
 
 func (fs *fileServer) handleError(rw http.ResponseWriter, err error) {
-	if fs.errorHandler != nil {
-		fs.errorHandler(fs.fileSystem, rw, err)
+	if fs.errorHandler == nil {
+		defaultErrorHandler(fs.fileSystem, rw, err)
 		return
 	}
 
-	defaultErrorHandler(fs.fileSystem, rw, err)
+	fs.errorHandler(fs.fileSystem, rw, err)
+}
+
+func (fs *fileServer) serveContent(
+	rw http.ResponseWriter,
+	req *http.Request,
+	file io.ReadSeeker,
+	fileInfo os.FileInfo,
+) {
+	indexPageName := "index.html"
+
+	if !fileInfo.IsDir() {
+		http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
+		return
+	}
+
+	if !strings.HasSuffix(req.URL.Path, "/") {
+		redirectTo(rw, req, fmt.Sprint(req.URL.Path, "/"))
+		return
+	}
+
+	req.URL.Path = fmt.Sprintf("%s/%s", req.URL.Path, indexPageName)
+	fs.ServeHTTP(rw, req)
 }
 
 func defaultErrorHandler(fs http.FileSystem, rw http.ResponseWriter, err error) {
