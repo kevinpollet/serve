@@ -46,11 +46,9 @@ func NewFileServer(dir string, options ...Option) http.Handler {
 }
 
 func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	if !strings.HasPrefix(req.URL.Path, "/") {
-		req.URL.Path = "/" + req.URL.Path
-	}
+	path := path.Clean(req.URL.Path)
 
-	file, fileInfo, err := fs.fileSystem.OpenWithStat(path.Clean(req.URL.Path))
+	file, fileInfo, err := fs.fileSystem.OpenWithStat(path)
 	if err != nil {
 		fs.handleError(rw, err)
 		return

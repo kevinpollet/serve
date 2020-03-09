@@ -20,5 +20,10 @@ func NewStripPrefixHandler(prefix string) alice.Constructor {
 
 func (h *stripPrefixHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	req.URL.Path = strings.TrimPrefix(req.URL.Path, h.prefix)
+
+	if !strings.HasPrefix(req.URL.Path, "/") {
+		req.URL.Path = "/" + req.URL.Path
+	}
+
 	h.next.ServeHTTP(rw, req)
 }
