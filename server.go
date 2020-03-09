@@ -7,10 +7,24 @@ import (
 	"os"
 	"path"
 	"strings"
+	"text/template"
 
 	"github.com/justinas/alice"
 	"github.com/kevinpollet/serge/log"
 )
+
+const autoIndexTemplate = `
+<!DOCTYPE html>
+<html>
+<body>
+<ul style="list-style: none;">
+{{range $file := .}}
+<li><a href="{{$file.Name}}">{{$file.Name}}</a></li>
+{{end}}
+</ul>
+</body>
+</html>
+`
 
 type fileServer struct {
 	autoIndex    bool
@@ -114,13 +128,14 @@ func (fs *fileServer) serveContent(
 			}
 
 			rw.Header().Add("Content-Type", "text/html")
-			fmt.Fprintln(rw, "<!DOCTYPE html>", "<html>", "<body>", "<ul style=\"list-style: none;\">")
 
-			for _, file := range files {
-				fmt.Fprintf(rw, "<li><a href=\"%s\">%s</a></li>", file.Name(), file.Name())
+			t, err := template.New("autoIndex").Parse(autoIndexTemplate)
+			if err != nil {
+				fs.handleError(rw, err)
+				return
 			}
 
-			fmt.Fprintln(rw, "</ul>", "</html>", "</body>")
+			t.Execute(rw, files) // nolint
 
 		default:
 			fs.handleError(rw, err)
