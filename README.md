@@ -54,6 +54,7 @@ func main() {
 	}
 
 	http.Handle("/static", serge.NewFileServer("examples/hello",
+		serge.WithAutoIndex(),
 		serge.WithMiddlewares(serge.NewStripPrefixHandler("/static")),
 		serge.WithErrorHandler(customErrorHandler),
 	))

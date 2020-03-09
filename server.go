@@ -13,9 +13,10 @@ import (
 )
 
 type fileServer struct {
-	fileSystem   http.FileSystem
-	middlewares  []alice.Constructor
+	autoIndex    bool
 	errorHandler func(http.FileSystem, http.ResponseWriter, error)
+	fileSystem   dotFileHiddingFileSystem
+	middlewares  []alice.Constructor
 }
 
 // NewFileServer returns a new handler instance that serves HTTP requests
@@ -31,12 +32,10 @@ func NewFileServer(dir string, options ...Option) http.Handler {
 }
 
 func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	urlPath := path.Clean(req.URL.Path)
 	contentEncodings := []string{encodingBrotli, encodingGzip, encodingDeflate}
 
 	if !strings.HasPrefix(req.URL.Path, "/") {
 		req.URL.Path = "/" + req.URL.Path
-		urlPath = path.Clean(req.URL.Path)
 	}
 
 	// negotiate content encoding
@@ -65,19 +64,13 @@ func (fs *fileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Add("Content-Encoding", contentEncoding)
 
 	// serve file
-	file, err := fs.fileSystem.Open(urlPath)
+	file, fileInfo, err := fs.fileSystem.OpenWithStat(path.Clean(req.URL.Path))
 	if err != nil {
 		fs.handleError(rw, err)
 		return
 	}
 
 	defer file.Close()
-
-	fileInfo, err := file.Stat()
-	if err != nil {
-		fs.handleError(rw, err)
-		return
-	}
 
 	fs.serveContent(rw, req, file, fileInfo)
 }
@@ -94,23 +87,52 @@ func (fs *fileServer) handleError(rw http.ResponseWriter, err error) {
 func (fs *fileServer) serveContent(
 	rw http.ResponseWriter,
 	req *http.Request,
-	file io.ReadSeeker,
+	file http.File,
 	fileInfo os.FileInfo,
 ) {
-	indexPageName := "index.html"
-
 	if !fileInfo.IsDir() {
 		http.ServeContent(rw, req, fileInfo.Name(), fileInfo.ModTime(), file)
 		return
 	}
 
+	// enforce trailing slash
 	if !strings.HasSuffix(req.URL.Path, "/") {
 		redirectTo(rw, req, fmt.Sprint(req.URL.Path, "/"))
 		return
 	}
 
-	req.URL.Path = fmt.Sprintf("%s/%s", req.URL.Path, indexPageName)
-	fs.ServeHTTP(rw, req)
+	indexFilePath := path.Clean(req.URL.Path + "/index.html")
+	indexFile, indexFileInfo, err := fs.fileSystem.OpenWithStat(indexFilePath)
+
+	if err != nil {
+		switch {
+		case fs.autoIndex && os.IsNotExist(err):
+			files, err := file.Readdir(-1)
+			if err != nil {
+				fs.handleError(rw, err)
+				return
+			}
+
+			rw.Header().Add("Content-Type", "text/html")
+			fmt.Fprintln(rw, "<!DOCTYPE html>", "<html>", "<body>", "<ul style=\"list-style: none;\">")
+
+			for _, file := range files {
+				fmt.Fprintf(rw, "<li><a href=\"%s\">%s</a></li>", file.Name(), file.Name())
+			}
+
+			fmt.Fprintln(rw, "</ul>", "</html>", "</body>")
+
+		default:
+			fs.handleError(rw, err)
+			return
+		}
+
+		return
+	}
+
+	defer indexFile.Close()
+
+	http.ServeContent(rw, req, indexFileInfo.Name(), indexFileInfo.ModTime(), indexFile)
 }
 
 func defaultErrorHandler(fs http.FileSystem, rw http.ResponseWriter, err error) {
