@@ -43,12 +43,13 @@ go get github.com/kevinpollet/serge
 serge [options]
 
 Options:
--addr    The server address, "127.0.0.1:8080" by default.
--auth    The basic auth credentials (password must be hashed with bcrypt and escaped with ''), e.g. hello:'$2y$12$...'
--dir     The directory containing the files to serve, "." by default.
--cert    The TLS certificate.
--key     The TLS private key.
--help    Prints this text.
+-addr      The server address, "127.0.0.1:8080" by default.
+-auth      The basic auth credentials (password must be hashed with bcrypt and escaped with '').
+-authfile  The basic auth credentials file following the ".htpasswd" format.
+-dir       The directory containing the files to serve, "." by default.
+-cert      The TLS certificate.
+-key       The TLS private key.
+-help      Prints this text.
 ```
 
 ### Docker
