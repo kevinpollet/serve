@@ -9,6 +9,7 @@
 **serge** is a simple, secure and modern HTTP server, written in [Go](https://go.dev/), that can be used to serve static sites, files or single-page applications. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **serge** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
 
 - Programmatic API.
+- HTTP/2 and TLS support.
 - Custom error handler and pages.
 - Basic HTTP authentication.
 - Hide dot files by default.
