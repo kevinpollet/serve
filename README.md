@@ -12,7 +12,7 @@
 - Custom error handler and pages.
 - Basic HTTP authentication.
 - Hide dot files by default.
-- Directory listing is disabled by default. 
+- Directory listing is disabled by default.
 - Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
 <hr/>
@@ -48,10 +48,10 @@ import (
 )
 
 func main() {
-  customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
+	customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
 			log.Print(err)
 			rw.WriteHeader(http.StatusInternalServerError)
-  }
+	}
 
 	http.Handle("/static", serge.NewFileServer("examples/hello",
 		serge.WithMiddlewares(serge.NewStripPrefixHandler("/static")),
