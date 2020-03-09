@@ -20,8 +20,9 @@
 
 - [Install](#install)
 - [Usage](#usage)
-	- [Docker](#docker)
-	- [API](#api)
+  - [Command-line](#command-line)
+  - [Docker](#docker)
+  - [API](#api)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -29,10 +30,26 @@
 ## Install
 
 ```
-go get -v github.com/kevinpollet/serge
+go get github.com/kevinpollet/serge
 ```
 
 ## Usage
+
+### Command-line
+
+**serge** can be use through its provided command-line. The following text is the output of the `serge -help` command.
+
+```shell
+serge [options]
+
+Options:
+-addr    The server address, "127.0.0.1:8080" by default.
+-auth    The basic auth credentials (password must be hashed with bcrypt and escaped with ''), e.g. hello:'$2y$12$...'
+-dir     The directory containing the files to serve, "." by default.
+-cert    The TLS certificate.
+-key     The TLS private key.
+-help    Prints this text.
+```
 
 ### Docker
 
