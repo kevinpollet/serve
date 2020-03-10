@@ -1,12 +1,12 @@
-# serge <!-- omit in toc -->
+# srv <!-- omit in toc -->
 
-[![Build Status](https://github.com/kevinpollet/serge/workflows/build/badge.svg)](https://github.com/kevinpollet/serge/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/serge)](https://goreportcard.com/report/github.com/kevinpollet/serge)
-[![GoDoc](https://godoc.org/github.com/kevinpollet/serge?status.svg)](https://pkg.go.dev/github.com/kevinpollet/serge)
+[![Build Status](https://github.com/kevinpollet/srv/workflows/build/badge.svg)](https://github.com/kevinpollet/srv/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/srv)](https://goreportcard.com/report/github.com/kevinpollet/srv)
+[![GoDoc](https://godoc.org/github.com/kevinpollet/srv?status.svg)](https://pkg.go.dev/github.com/kevinpollet/srv)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![License](https://img.shields.io/github/license/kevinpollet/serge)](./LICENSE.md)
+[![License](https://img.shields.io/github/license/kevinpollet/srv)](./LICENSE.md)
 
-**serge** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve a static site, single-page application or a file with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **serge** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
+**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve a static site, single-page application or a file with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **srv** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
 
 - Programmatic API.
 - HTTP/2 and TLS support.
@@ -27,17 +27,17 @@
 ## Install
 
 ```
-go get github.com/kevinpollet/serge
+go get github.com/kevinpollet/srv
 ```
 
 ## Usage
 
 ### Command-line <!-- omit in toc -->
 
-**serge** can be use through its provided command-line. The following text is the output of the `serge -help` command.
+**srv** can be use through its provided command-line. The following text is the output of the `srv -help` command.
 
 ```shell
-serge [options]
+srv [options]
 
 Options:
 -addr      The server address, "127.0.0.1:8080" by default.
@@ -51,10 +51,10 @@ Options:
 
 ### Docker <!-- omit in toc -->
 
-An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/serge). The following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for TCP connections on `8080`.
+An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/srv). The following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for TCP connections on `8080`.
 
 ```
-FROM kevinpollet/serge:latest
+FROM kevinpollet/srv:latest
 COPY . /var/www/
 ```
 
@@ -74,8 +74,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kevinpollet/serge"
-	"github.com/kevinpollet/serge/middlewares"
+	"github.com/kevinpollet/srv"
+	"github.com/kevinpollet/srv/middlewares"
 )
 
 func main() {
@@ -84,10 +84,10 @@ func main() {
 			rw.WriteHeader(http.StatusInternalServerError)
 	}
 
-	http.Handle("/static", serge.NewFileServer("examples/hello",
-		serge.WithAutoIndex(),
-		serge.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-		serge.WithErrorHandler(customErrorHandler),
+	http.Handle("/static", srv.NewFileServer("examples/hello",
+		srv.WithAutoIndex(),
+		srv.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
+		srv.WithErrorHandler(customErrorHandler),
 	))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))

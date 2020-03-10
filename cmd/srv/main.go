@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/justinas/alice"
-	"github.com/kevinpollet/serge"
-	"github.com/kevinpollet/serge/log"
-	"github.com/kevinpollet/serge/middlewares"
+	"github.com/kevinpollet/srv"
+	"github.com/kevinpollet/srv/log"
+	"github.com/kevinpollet/srv/middlewares"
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 	flagKey      = flag.String("key", "", "")
 )
 
-const helpText = `serge [options]
+const helpText = `srv [options]
 
 Options:
 -addr      The server address, "127.0.0.1:8080" by default.
@@ -46,7 +46,7 @@ func main() {
 	switch {
 	case len(*flagAuth) > 0:
 		reader := strings.NewReader(*flagAuth)
-		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serge", reader)
+		basicAuthHandler, err := middlewares.NewBasicAuthHandler("srv", reader)
 
 		if err != nil {
 			log.Logger().Fatal(err)
@@ -62,7 +62,7 @@ func main() {
 
 		defer file.Close()
 
-		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serge", file)
+		basicAuthHandler, err := middlewares.NewBasicAuthHandler("srv", file)
 		if err != nil {
 			exitWithError(err)
 		}
@@ -80,7 +80,7 @@ func main() {
 		Addr:         *flagAddr,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      serge.NewFileServer(*flagDir, serge.WithMiddlewares(handlers...)),
+		Handler:      srv.NewFileServer(*flagDir, srv.WithMiddlewares(handlers...)),
 	}
 
 	log.Logger().Printf("server is listening on: %s", server.Addr)

@@ -1,4 +1,4 @@
-package serge
+package srv
 
 import (
 	"net/http"

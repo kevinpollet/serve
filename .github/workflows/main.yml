@@ -29,6 +29,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: elgohr/publish-docker-github-action@2.13
         with:
-          name: kevinpollet/serge
+          name: kevinpollet/srv
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}

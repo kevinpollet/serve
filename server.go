@@ -1,4 +1,4 @@
-package serge
+package srv
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"text/template"
 
 	"github.com/justinas/alice"
-	"github.com/kevinpollet/serge/log"
+	"github.com/kevinpollet/srv/log"
 )
 
 const autoIndexTemplate = `

@@ -1,4 +1,4 @@
-module github.com/kevinpollet/serge
+module github.com/kevinpollet/srv
 
 go 1.14
 
