@@ -6,7 +6,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/srv)](./LICENSE.md)
 
-**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve a static site, single-page application or a file with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **srv** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
+**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites, single-page applications or a file with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **srv** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
 
 - Programmatic API.
 - HTTP/2 and TLS support.
