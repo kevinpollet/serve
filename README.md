@@ -26,8 +26,9 @@
 
 ## Install
 
-```
-go get github.com/kevinpollet/srv
+```shell
+go get github.com/kevinpollet/srv                  # get dependency
+go install -i github.com/kevinpollet/srv/cmd/srv   # build and install command-line interface bin
 ```
 
 ## Usage
