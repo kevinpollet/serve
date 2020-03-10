@@ -12,58 +12,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type basicAuthHandler struct {
-	credentials map[string][]byte
-	next        http.Handler
-}
+type hashedCredentials map[string][]byte
 
-func NewBasicAuthHandler(reader io.Reader) (alice.Constructor, error) {
-	credentials, err := parseCredentials(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	handler := func(next http.Handler) http.Handler {
-		return &basicAuthHandler{credentials, next}
-	}
-
-	return handler, nil
-}
-
-func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	user, pass, hasAuth := req.BasicAuth()
-
-	if !hasAuth {
-		rw.Header().Add("WWW-Authenticate", "Basic realm=\"serge\"")
-		rw.WriteHeader(http.StatusUnauthorized)
-
-		return
-	}
-
-	if !h.authenticate(user, pass) {
-		rw.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	h.next.ServeHTTP(rw, req)
-}
-
-func (h *basicAuthHandler) authenticate(user, pass string) bool {
-	passwordHash, userExists := h.credentials[user]
-	return userExists && bcrypt.CompareHashAndPassword(passwordHash, []byte(pass)) == nil
-}
-
-func parseCredentials(reader io.Reader) (map[string][]byte, error) {
+func parseHashedCredentials(reader io.Reader) (hashedCredentials, error) {
 	scanner := bufio.NewScanner(reader)
-	credentialPrefixRegexp := regexp.MustCompile(`\$2[axy]*\$`)
-	credentials := make(map[string][]byte)
+	bcryptPrefixRegexp := regexp.MustCompile(`\$2[aby]*\$`)
+	credentials := make(hashedCredentials)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Split(line, ":")
 
-		if len(parts) != 2 || !credentialPrefixRegexp.MatchString(parts[1]) {
-			return nil, fmt.Errorf("unsupported password encoding")
+		if len(parts) != 2 || !bcryptPrefixRegexp.MatchString(parts[1]) {
+			return nil, fmt.Errorf("unsupported password hash: only bcrypt is supported")
 		}
 
 		credentials[parts[0]] = []byte(parts[1])
@@ -74,4 +35,46 @@ func parseCredentials(reader io.Reader) (map[string][]byte, error) {
 	}
 
 	return credentials, nil
+}
+
+func (c hashedCredentials) match(user, password string) bool {
+	hash, exists := c[user]
+	return exists && bcrypt.CompareHashAndPassword(hash, []byte(password)) == nil
+}
+
+type basicAuthHandler struct {
+	credentials hashedCredentials
+	next        http.Handler
+	realm       string
+}
+
+func NewBasicAuthHandler(realm string, reader io.Reader) (alice.Constructor, error) {
+	credentials, err := parseHashedCredentials(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	handler := func(next http.Handler) http.Handler {
+		return &basicAuthHandler{credentials, next, realm}
+	}
+
+	return handler, nil
+}
+
+func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	user, password, hasAuth := req.BasicAuth()
+
+	if !hasAuth {
+		rw.Header().Add("WWW-Authenticate", fmt.Sprintf("Basic realm=\"%s\"", h.realm))
+		rw.WriteHeader(http.StatusUnauthorized)
+
+		return
+	}
+
+	if !h.credentials.match(user, password) {
+		rw.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	h.next.ServeHTTP(rw, req)
 }
