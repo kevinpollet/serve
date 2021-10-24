@@ -17,7 +17,7 @@ import (
 var (
 	flagAddr     = flag.String("addr", "127.0.0.1:8080", "")
 	flagAuth     = flag.String("auth", "", "")
-	flagAuthfile = flag.String("authfile", "", "")
+	flagAuthFile = flag.String("auth-file", "", "")
 	flagDir      = flag.String("dir", ".", "")
 	flagCert     = flag.String("cert", "", "")
 	flagKey      = flag.String("key", "", "")
@@ -26,13 +26,13 @@ var (
 const helpText = `srv [options]
 
 Options:
--addr      The server address, "127.0.0.1:8080" by default.
--auth      The basic auth credentials (password must be hashed with bcrypt and escaped with '').
--authfile  The basic auth credentials following the ".htpasswd" format.
--dir       The directory containing the files to serve, "." by default.
--cert      The TLS certificate.
--key       The TLS private key.
--help      Prints this text.
+-addr       The server address, "127.0.0.1:8080" by default.
+-auth       The basic auth credentials (password must be hashed with bcrypt and escaped with '').
+-auth-file  The basic auth credentials following the ".htpasswd" format.
+-dir        The directory containing the files to serve, "." by default.
+-cert       The TLS certificate.
+-key        The TLS private key.
+-help       Prints this text.
 `
 
 func init() {
@@ -54,8 +54,8 @@ func main() {
 
 		handlers = append(handlers, basicAuthHandler)
 
-	case len(*flagAuthfile) > 0:
-		file, err := os.Open(*flagAuthfile)
+	case len(*flagAuthFile) > 0:
+		file, err := os.Open(*flagAuthFile)
 		if err != nil {
 			exitWithError(err)
 		}
