@@ -6,15 +6,14 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE.md)
 
-Simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites,
-single-page applications or a file with ease. You can use it through its command-line
-interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it
-should be easy to integrate it into your application. The following key features make **srv** unique and differentiable
-from the existing solutions and the `http.FileServer` implementation.
+Simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites, single-page
+applications or files. It can be used through its command-line interface, [Docker](https://www.docker.com/) image or
+programmatically. As it's an `http.Handler` implementation, it can be used as a drop-in replacement of
+the `http.FileServer` from the standard library and can be integrated easily.
 
 - Programmatic API.
 - HTTP/2 and TLS support.
-- Custom error handler and pages.
+- Custom error pages.
 - Basic HTTP authentication.
 - Hide dot files by default.
 - Directory listing is disabled by default.
@@ -66,10 +65,10 @@ func main() {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}
 
-	http.Handle("/static", serve.NewFileServer("examples/hello", 
-            serve.WithAutoIndex(), 
-            serve.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-            serve.WithErrorHandler(customErrorHandler),
+	http.Handle("/static", serve.NewFileServer("examples/hello",
+		serve.WithAutoIndex(),
+		serve.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
+		serve.WithErrorHandler(customErrorHandler),
 	))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
