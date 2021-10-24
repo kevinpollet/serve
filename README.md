@@ -21,14 +21,6 @@ from the existing solutions and the `http.FileServer` implementation.
 - Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE)
   and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
-## Table of Contents <!-- omit in toc -->
-
-- [Install](#install)
-- [Usage](#usage)
-- [Examples](#examples)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## Install
 
 ```shell
