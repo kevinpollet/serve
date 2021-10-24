@@ -1,4 +1,4 @@
-# srv <!-- omit in toc -->
+# srv
 
 [![Build Status](https://github.com/kevinpollet/srv/workflows/build/badge.svg)](https://github.com/kevinpollet/srv/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/srv)](https://goreportcard.com/report/github.com/kevinpollet/srv)
@@ -21,16 +21,16 @@ from the existing solutions and the `http.FileServer` implementation.
 - Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE)
   and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
-## Install
+## Installation
 
 ```shell
-go get github.com/kevinpollet/srv                  # get dependency
-go install -i github.com/kevinpollet/srv/cmd/srv   # build and install command-line interface bin
+go get github.com/kevinpollet/srv               # get dependency
+go install github.com/kevinpollet/srv/cmd/srv   # build and install command-line interface bin
 ```
 
 ## Usage
 
-### Command-line <!-- omit in toc -->
+### Command-line
 
 **srv** can be use through its provided command-line. The following text is the output of the `srv -help` command.
 
@@ -47,7 +47,36 @@ Options:
 -help      Prints this text.
 ```
 
-### Docker <!-- omit in toc -->
+### Library
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/kevinpollet/srv"
+	"github.com/kevinpollet/srv/middlewares"
+)
+
+func main() {
+	customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
+		log.Print(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+	}
+
+	http.Handle("/static", srv.NewFileServer("examples/hello",
+		srv.WithAutoIndex(),
+		srv.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
+		srv.WithErrorHandler(customErrorHandler),
+	))
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+```
+
+### Docker
 
 An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/srv). The
 following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running
@@ -65,35 +94,6 @@ on http://localhost:8080.
 ```shell
 docker build . -t moby:latest
 docker run -d -p 8080:8080 moby:latest
-```
-
-### API <!-- omit in toc -->
-
-```go
-package main
-
-import (
-	"log"
-	"net/http"
-
-	"github.com/kevinpollet/srv"
-	"github.com/kevinpollet/srv/middlewares"
-)
-
-func main() {
-	customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
-			log.Print(err)
-			rw.WriteHeader(http.StatusInternalServerError)
-	}
-
-	http.Handle("/static", srv.NewFileServer("examples/hello",
-		srv.WithAutoIndex(),
-		srv.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-		srv.WithErrorHandler(customErrorHandler),
-	))
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
 ```
 
 ## Examples
