@@ -34,7 +34,7 @@ go install github.com/kevinpollet/serve/cmd/serve   # build and install command-
 The following text is the output of the `serve -help` command.
 
 ```shell
-serve [options]
+Usage: serve [options]
 
 Options:
 -addr       The server address, "127.0.0.1:8080" by default.

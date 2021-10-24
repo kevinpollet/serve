@@ -23,7 +23,7 @@ var (
 	flagKey      = flag.String("key", "", "")
 )
 
-const helpText = `serve [options]
+const helpText = `Usage: serve [options]
 
 Options:
 -addr       The server address, "127.0.0.1:8080" by default.
@@ -41,7 +41,7 @@ func init() {
 }
 
 func main() {
-	handlers := make([]alice.Constructor, 0)
+	var handlers []alice.Constructor
 
 	switch {
 	case len(*flagAuth) > 0:
@@ -49,7 +49,7 @@ func main() {
 
 		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serve", reader)
 		if err != nil {
-			log.Logger().Fatal(err)
+			exitWithError(err)
 		}
 
 		handlers = append(handlers, basicAuthHandler)
@@ -60,7 +60,7 @@ func main() {
 			exitWithError(err)
 		}
 
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 
 		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serve", file)
 		if err != nil {

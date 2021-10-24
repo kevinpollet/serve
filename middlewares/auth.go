@@ -55,16 +55,13 @@ func NewBasicAuthHandler(realm string, reader io.Reader) (alice.Constructor, err
 		return nil, err
 	}
 
-	handler := func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
 		return &basicAuthHandler{credentials, next, realm}
-	}
-
-	return handler, nil
+	}, nil
 }
 
 func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	user, password, hasAuth := req.BasicAuth()
-
 	if !hasAuth {
 		rw.Header().Add("WWW-Authenticate", fmt.Sprintf("Basic realm=\"%s\"", h.realm))
 		rw.WriteHeader(http.StatusUnauthorized)
