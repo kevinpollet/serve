@@ -29,7 +29,6 @@ const defaultAutoIndexTemplate = `
 type FileServer struct {
 	autoIndex     bool
 	autoIndexTmpl *template.Template
-	errorHandler  func(http.FileSystem, http.ResponseWriter, error)
 	fileSystem    dotFileHidingFileSystem
 	middlewares   []alice.Constructor
 }
@@ -66,12 +65,20 @@ func (fs *FileServer) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (fs *FileServer) handleError(rw http.ResponseWriter, err error) {
-	if fs.errorHandler == nil {
-		defaultErrorHandler(fs.fileSystem, rw, err)
-		return
+	statusCode := http.StatusInternalServerError
+
+	if os.IsNotExist(err) || os.IsPermission(err) {
+		statusCode = http.StatusNotFound
 	}
 
-	fs.errorHandler(fs.fileSystem, rw, err)
+	rw.WriteHeader(statusCode)
+
+	errorPageName := fmt.Sprintf("%d.html", statusCode)
+	if file, err := fs.fileSystem.Open(errorPageName); err == nil {
+		defer func() { _ = file.Close() }()
+
+		_, _ = io.Copy(rw, file)
+	}
 }
 
 func (fs *FileServer) serveContent(rw http.ResponseWriter, req *http.Request, file http.File, fileInfo os.FileInfo) {
@@ -110,23 +117,6 @@ func (fs *FileServer) serveContent(rw http.ResponseWriter, req *http.Request, fi
 	rw.Header().Add("Content-Type", "text/html")
 
 	_ = fs.autoIndexTmpl.Execute(rw, files)
-}
-
-func defaultErrorHandler(fs http.FileSystem, rw http.ResponseWriter, err error) {
-	statusCode := http.StatusInternalServerError
-
-	if os.IsNotExist(err) || os.IsPermission(err) {
-		statusCode = http.StatusNotFound
-	}
-
-	rw.WriteHeader(statusCode)
-
-	errorPageName := fmt.Sprintf("%d.html", statusCode)
-	if file, err := fs.Open(errorPageName); err == nil {
-		defer func() { _ = file.Close() }()
-
-		_, _ = io.Copy(rw, file)
-	}
 }
 
 func redirectTo(rw http.ResponseWriter, req *http.Request, path string) {

@@ -1,10 +1,6 @@
 package serve
 
-import (
-	"net/http"
-
-	"github.com/justinas/alice"
-)
+import "github.com/justinas/alice"
 
 // Option is the functional option type.
 type Option func(*FileServer)
@@ -20,12 +16,5 @@ func WithAutoIndex() Option {
 func WithMiddlewares(middlewares ...alice.Constructor) Option {
 	return func(fs *FileServer) {
 		fs.middlewares = middlewares
-	}
-}
-
-// WithErrorHandler sets the Error handler.
-func WithErrorHandler(errorHandler func(http.FileSystem, http.ResponseWriter, error)) Option {
-	return func(fs *FileServer) {
-		fs.errorHandler = errorHandler
 	}
 }

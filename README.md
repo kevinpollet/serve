@@ -60,15 +60,9 @@ import (
 )
 
 func main() {
-	customErrorHandler := func(fs http.FileSystem, rw http.ResponseWriter, err error) {
-		log.Print(err)
-		rw.WriteHeader(http.StatusInternalServerError)
-	}
-
 	http.Handle("/static", serve.NewFileServer("examples/hello",
 		serve.WithAutoIndex(),
 		serve.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-		serve.WithErrorHandler(customErrorHandler),
 	))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
