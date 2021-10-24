@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,7 +25,7 @@ func parseHashedCredentials(reader io.Reader) (hashedCredentials, error) {
 		parts := strings.Split(line, ":")
 
 		if len(parts) != 2 || !bcryptPrefixRegexp.MatchString(parts[1]) {
-			return nil, fmt.Errorf("unsupported password hash: only bcrypt is supported")
+			return nil, errors.New("unsupported password hash: only bcrypt is supported")
 		}
 
 		credentials[parts[0]] = []byte(parts[1])

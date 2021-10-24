@@ -1,6 +1,14 @@
 linters:
   enable-all: true
   disable:
+    - scopelint # deprecated
+    - maligned # deprecated
+    - interfacer # deprecated
+    - golint # deprecated
     - gomnd
     - gochecknoinits
     - gochecknoglobals
+    - wrapcheck
+    - nlreturn
+    - exhaustivestruct
+    - goerr113

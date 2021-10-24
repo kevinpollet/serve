@@ -86,8 +86,8 @@ func (fs *fileServer) serveContent(
 	}
 
 	indexFilePath := path.Clean(req.URL.Path + "/index.html")
-	indexFile, indexFileInfo, err := fs.fileSystem.OpenWithStat(indexFilePath)
 
+	indexFile, indexFileInfo, err := fs.fileSystem.OpenWithStat(indexFilePath)
 	if err != nil {
 		switch {
 		case fs.autoIndex && os.IsNotExist(err):
@@ -141,8 +141,7 @@ func defaultErrorHandler(fs http.FileSystem, rw http.ResponseWriter, err error) 
 }
 
 func redirectTo(rw http.ResponseWriter, req *http.Request, path string) {
-	query := req.URL.RawQuery
-	if query != "" {
+	if query := req.URL.RawQuery; query != "" {
 		path += fmt.Sprint("?", query)
 	}
 

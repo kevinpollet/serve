@@ -46,8 +46,8 @@ func main() {
 	switch {
 	case len(*flagAuth) > 0:
 		reader := strings.NewReader(*flagAuth)
-		basicAuthHandler, err := middlewares.NewBasicAuthHandler("srv", reader)
 
+		basicAuthHandler, err := middlewares.NewBasicAuthHandler("srv", reader)
 		if err != nil {
 			log.Logger().Fatal(err)
 		}
@@ -98,6 +98,6 @@ func exitWithError(err error) {
 }
 
 func help() {
-	fmt.Println(helpText)
+	fmt.Print(helpText) // nolint
 	os.Exit(2)
 }
