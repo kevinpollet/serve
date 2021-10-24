@@ -1,2 +1,2 @@
-FROM kevinpollet/srv:latest
+FROM kevinpollet/serve:latest
 COPY index.html /var/www/

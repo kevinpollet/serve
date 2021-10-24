@@ -1,12 +1,12 @@
-# srv
+# serve
 
-[![Build Status](https://github.com/kevinpollet/srv/workflows/build/badge.svg)](https://github.com/kevinpollet/srv/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/srv)](https://goreportcard.com/report/github.com/kevinpollet/srv)
-[![GoDoc](https://godoc.org/github.com/kevinpollet/srv?status.svg)](https://pkg.go.dev/github.com/kevinpollet/srv)
+[![Build Status](https://github.com/kevinpollet/serve/workflows/build/badge.svg)](https://github.com/kevinpollet/serve/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/serve)](https://goreportcard.com/report/github.com/kevinpollet/serve)
+[![GoDoc](https://godoc.org/github.com/kevinpollet/serve?status.svg)](https://pkg.go.dev/github.com/kevinpollet/serve)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![License](https://img.shields.io/github/license/kevinpollet/srv)](./LICENSE.md)
+[![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE.md)
 
-**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites,
+Simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites,
 single-page applications or a file with ease. You can use it through its command-line
 interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it
 should be easy to integrate it into your application. The following key features make **srv** unique and differentiable
@@ -24,18 +24,18 @@ from the existing solutions and the `http.FileServer` implementation.
 ## Installation
 
 ```shell
-go get github.com/kevinpollet/srv               # get dependency
-go install github.com/kevinpollet/srv/cmd/srv   # build and install command-line interface bin
+go get github.com/kevinpollet/serve                 # get dependency
+go install github.com/kevinpollet/serve/cmd/serve   # build and install command-line interface bin
 ```
 
 ## Usage
 
 ### Command-line
 
-**srv** can be use through its provided command-line. The following text is the output of the `srv -help` command.
+The following text is the output of the `serve -help` command.
 
 ```shell
-srv [options]
+serve [options]
 
 Options:
 -addr       The server address, "127.0.0.1:8080" by default.
@@ -56,8 +56,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/kevinpollet/srv"
-	"github.com/kevinpollet/srv/middlewares"
+	"github.com/kevinpollet/serve"
+	"github.com/kevinpollet/serve/middlewares"
 )
 
 func main() {
@@ -66,10 +66,10 @@ func main() {
 		rw.WriteHeader(http.StatusInternalServerError)
 	}
 
-	http.Handle("/static", srv.NewFileServer("examples/hello",
-		srv.WithAutoIndex(),
-		srv.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-		srv.WithErrorHandler(customErrorHandler),
+	http.Handle("/static", serve.NewFileServer("examples/hello", 
+            serve.WithAutoIndex(), 
+            serve.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
+            serve.WithErrorHandler(customErrorHandler),
 	))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -78,13 +78,13 @@ func main() {
 
 ### Docker
 
-An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/srv). The
+An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/serve). The
 following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running
 Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for
 TCP connections on `8080`.
 
 ```
-FROM kevinpollet/srv:latest
+FROM kevinpollet/serve:latest
 COPY . /var/www/
 ```
 

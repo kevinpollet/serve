@@ -1,4 +1,4 @@
-module github.com/kevinpollet/srv
+module github.com/kevinpollet/serve
 
 go 1.17
 
