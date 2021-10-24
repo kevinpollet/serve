@@ -6,10 +6,10 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE.md)
 
-Simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites, single-page
-applications or files. It can be used through its command-line interface, [Docker](https://www.docker.com/) image or
-programmatically. As it's an `http.Handler` implementation, it can be used as a drop-in replacement of
-the `http.FileServer` from the standard library and can be integrated easily.
+Simple, secure [Go](https://go.dev/) `HTTP` server to serve static sites, single-page applications or files. It can be
+used through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's
+an `http.Handler` implementation, it can be used as a drop-in replacement of the `http.FileServer` from the standard
+library and can be integrated easily.
 
 - Programmatic API.
 - HTTP/2 and TLS support.
