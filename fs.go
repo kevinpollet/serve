@@ -16,7 +16,7 @@ func (f dotFileHidingFile) Readdir(n int) ([]os.FileInfo, error) {
 		return nil, err
 	}
 
-	filteredFiles := make([]os.FileInfo, 0)
+	var filteredFiles []os.FileInfo
 
 	for _, file := range files {
 		if !strings.HasPrefix(file.Name(), ".") {
