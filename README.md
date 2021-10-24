@@ -6,7 +6,11 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![License](https://img.shields.io/github/license/kevinpollet/srv)](./LICENSE.md)
 
-**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites, single-page applications or a file with ease. You can use it through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it should be easy to integrate it into your application. The following key features make **srv** unique and differentiable from the existing solutions and the `http.FileServer` implementation.
+**srv** is a simple, secure and modern `HTTP` server, written in [Go](https://go.dev/), to serve static sites,
+single-page applications or a file with ease. You can use it through its command-line
+interface, [Docker](https://www.docker.com/) image or programmatically. As it's an `http.Handler` implementation, it
+should be easy to integrate it into your application. The following key features make **srv** unique and differentiable
+from the existing solutions and the `http.FileServer` implementation.
 
 - Programmatic API.
 - HTTP/2 and TLS support.
@@ -14,7 +18,8 @@
 - Basic HTTP authentication.
 - Hide dot files by default.
 - Directory listing is disabled by default.
-- Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE) and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
+- Encoding negotiation with support of [gzip](https://www.gzip.org/), [Deflate](https://en.wikipedia.org/wiki/DEFLATE)
+  and [Brotli](https://en.wikipedia.org/wiki/Brotli) compression algorithms.
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -52,14 +57,18 @@ Options:
 
 ### Docker <!-- omit in toc -->
 
-An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/srv). The following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for TCP connections on `8080`.
+An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/srv). The
+following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running
+Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for
+TCP connections on `8080`.
 
 ```
 FROM kevinpollet/srv:latest
 COPY . /var/www/
 ```
 
-Then, you can build and run your Docker image with the following commands. Your static site or files will be available on http://localhost:8080.
+Then, you can build and run your Docker image with the following commands. Your static site or files will be available
+on http://localhost:8080.
 
 ```shell
 docker build . -t moby:latest
