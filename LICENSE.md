@@ -1,6 +1,6 @@
 # The MIT License (MIT)
 
-Copyright © `2020` `kevinpollet <pollet.kevin@gmail.com>`
+Copyright © `2021` `kevinpollet <pollet.kevin@gmail.com>`
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
