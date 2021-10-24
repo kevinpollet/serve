@@ -1,0 +1,13 @@
+name: build
+on: [ push ]
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: elgohr/publish-docker-github-action@2.13
+        with:
+          name: kevinpollet/srv
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
