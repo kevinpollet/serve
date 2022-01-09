@@ -1,4 +1,4 @@
-package serve
+package main
 
 import "github.com/justinas/alice"
 
@@ -6,7 +6,7 @@ import "github.com/justinas/alice"
 type Option func(*FileServer)
 
 // WithAutoIndex enables auto index.
-func WithAutoIndex() Option {
+func WithAutoIndex() Option { // nolint
 	return func(fs *FileServer) {
 		fs.autoIndex = true
 	}

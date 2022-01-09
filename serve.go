@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/justinas/alice"
-	"github.com/kevinpollet/serve"
 	"github.com/kevinpollet/serve/log"
 	"github.com/kevinpollet/serve/middlewares"
 )
@@ -80,7 +79,7 @@ func main() {
 		Addr:         *flagAddr,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Handler:      serve.NewFileServer(*flagDir, serve.WithMiddlewares(handlers...)),
+		Handler:      NewFileServer(*flagDir, WithMiddlewares(handlers...)),
 	}
 
 	log.Logger().Printf("server is listening on: %s", server.Addr)
