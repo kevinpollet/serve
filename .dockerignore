@@ -1,7 +1,0 @@
-*
-!cmd/
-!log/
-!middlewares/
-!*.go
-!go.mod
-!go.sum
