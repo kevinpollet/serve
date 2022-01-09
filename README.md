@@ -20,18 +20,16 @@ go install github.com/kevinpollet/serve
 
 ## Usage
 
-Output of the `serve -help` command:
-
 ```shell
 Usage: serve [options]
 
 Options:
--addr       The server address, "127.0.0.1:8080" by default.
--auth       The basic auth credentials (password must be hashed with bcrypt and escaped with '').
--auth-file  The basic auth credentials following the ".htpasswd" format.
--dir        The directory containing the files to serve, "." by default.
--cert       The TLS certificate.
--key        The TLS private key.
+-addr       Sets the server address. Default is "127.0.0.1:8080".
+-auth       Sets the basic auth credentials (password must be hashed with bcrypt and escaped with '').
+-auth-file  Sets the basic auth credentials following the ".htpasswd" format.
+-dir        Sets the directory containing the files to serve. Default is ".".
+-cert       Sets the TLS certificate.
+-key        Sets the TLS private key.
 -help       Prints this text.
 ```
 

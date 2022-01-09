@@ -22,24 +22,26 @@ var (
 	flagKey      = flag.String("key", "", "")
 )
 
-const helpText = `Usage: serve [options]
+const usage = `Usage: serve [options]
 
 Options:
--addr       The server address, "127.0.0.1:8080" by default.
--auth       The basic auth credentials (password must be hashed with bcrypt and escaped with '').
--auth-file  The basic auth credentials following the ".htpasswd" format.
--dir        The directory containing the files to serve, "." by default.
--cert       The TLS certificate.
--key        The TLS private key.
+-addr       Sets the server address. Default is "127.0.0.1:8080".
+-auth       Sets the basic auth credentials (password must be hashed with bcrypt and escaped with '').
+-auth-file  Sets the basic auth credentials following the ".htpasswd" format.
+-dir        Sets the directory containing the files to serve. Default is ".".
+-cert       Sets the TLS certificate.
+-key        Sets the TLS private key.
 -help       Prints this text.
 `
 
-func init() {
-	flag.Usage = help
-	flag.Parse()
-}
-
 func main() {
+	flag.Usage = func() {
+		fmt.Fprint(os.Stderr, usage)
+		os.Exit(2)
+	}
+
+	flag.Parse()
+
 	var handlers []alice.Constructor
 
 	switch {
@@ -48,7 +50,7 @@ func main() {
 
 		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serve", reader)
 		if err != nil {
-			exitWithError(err)
+			errExit(err)
 		}
 
 		handlers = append(handlers, basicAuthHandler)
@@ -56,14 +58,14 @@ func main() {
 	case len(*flagAuthFile) > 0:
 		file, err := os.Open(*flagAuthFile)
 		if err != nil {
-			exitWithError(err)
+			errExit(err)
 		}
 
 		defer func() { _ = file.Close() }()
 
 		basicAuthHandler, err := middlewares.NewBasicAuthHandler("serve", file)
 		if err != nil {
-			exitWithError(err)
+			errExit(err)
 		}
 
 		handlers = append(handlers, basicAuthHandler)
@@ -91,12 +93,7 @@ func main() {
 	log.Logger().Fatal(server.ListenAndServe())
 }
 
-func exitWithError(err error) {
+func errExit(err error) {
 	log.Logger().Error(err)
 	os.Exit(1)
-}
-
-func help() {
-	fmt.Print(helpText) // nolint
-	os.Exit(2)
 }
