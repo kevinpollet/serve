@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/serve)](https://goreportcard.com/report/github.com/kevinpollet/serve)
 [![GoDoc](https://godoc.org/github.com/kevinpollet/serve?status.svg)](https://pkg.go.dev/github.com/kevinpollet/serve)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE.md)
+[![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE)
 
 Simple, secure [Go](https://go.dev/) `HTTP` server to serve static sites, single-page applications or files. It can be
 used through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's
@@ -108,4 +108,4 @@ Want to file a bug, request a feature or contribute some code?
 
 ## License
 
-[MIT](./LICENSE.md)
+[MIT](./LICENSE)
