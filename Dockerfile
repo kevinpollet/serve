@@ -3,7 +3,7 @@ WORKDIR /go/src/serve
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -v -o /go/bin/serve serve.go
+RUN go build -v -o /go/bin/serve .
 
 FROM alpine:3.14
 COPY --chown=65534:65534 --from=builder /go/bin/serve /usr/local/bin

@@ -1,19 +1,11 @@
 # serve
 
 [![Build Status](https://github.com/kevinpollet/serve/workflows/build/badge.svg)](https://github.com/kevinpollet/serve/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevinpollet/serve)](https://goreportcard.com/report/github.com/kevinpollet/serve)
-[![GoDoc](https://godoc.org/github.com/kevinpollet/serve?status.svg)](https://pkg.go.dev/github.com/kevinpollet/serve)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![License](https://img.shields.io/github/license/kevinpollet/serve)](./LICENSE)
 
-Simple, secure [Go](https://go.dev/) `HTTP` server to serve static sites, single-page applications or files. It can be
-used through its command-line interface, [Docker](https://www.docker.com/) image or programmatically. As it's
-an `http.Handler` implementation, it can be used as a drop-in replacement of the `http.FileServer` from the standard
-library and can be integrated easily.
+Simple and secure [Go](https://go.dev/) `HTTP` server to serve static sites or files from the command-line.
 
-- Programmatic API.
 - HTTP/2 and TLS support.
-- Custom error pages.
+- Custom Error pages.
 - Basic HTTP authentication.
 - Hide dot files by default.
 - Directory listing is disabled by default.
@@ -23,15 +15,12 @@ library and can be integrated easily.
 ## Installation
 
 ```shell
-go get github.com/kevinpollet/serve                 # get dependency
-go install github.com/kevinpollet/serve/cmd/serve   # build and install command-line interface bin
+go install github.com/kevinpollet/serve
 ```
 
 ## Usage
 
-### Command-line
-
-The following text is the output of the `serve -help` command.
+Output of the `serve -help` command:
 
 ```shell
 Usage: serve [options]
@@ -46,61 +35,22 @@ Options:
 -help       Prints this text.
 ```
 
-### Library
-
-```go
-package main
-
-import (
-	"log"
-	"net/http"
-
-	"github.com/kevinpollet/serve"
-	"github.com/kevinpollet/serve/middlewares"
-)
-
-func main() {
-	http.Handle("/static", serve.NewFileServer("examples/hello",
-		serve.WithAutoIndex(),
-		serve.WithMiddlewares(middlewares.NewStripPrefixHandler("/static")),
-	))
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-```
-
 ### Docker
 
-An official docker image is available on [Docker Hub](https://hub.docker.com/r/kevinpollet/serve). The
-following `Dockerfile` shows how to use the provided base image to serve your static sites or files through a running
-Docker container. By default, the base image will serve all files available in the `/var/www/` directory and listen for
-TCP connections on `8080`.
-
-```
-FROM kevinpollet/serve:latest
-COPY . /var/www/
-```
-
-Then, you can build and run your Docker image with the following commands. Your static site or files will be available
-on http://localhost:8080.
-
-```shell
-docker build . -t moby:latest
-docker run -d -p 8080:8080 moby:latest
-```
+A Docker [image](https://hub.docker.com/r/kevinpollet/serve) is available to serve static files from a running Docker
+container. By default, all files located in the `/var/www/` directory will be made available through TCP connections on
+port `8080`. For more details, check out the Docker [example](./examples/docker).
 
 ## Examples
 
-The [examples](./examples) directory contains the following examples:
-
-- [hello](./examples/hello) — A simple static site that can be served from the command-line.
-- [docker](./examples/docker) — A simple static site that can be served from a docker container.
+- [hello](./examples/hello) — Simple static site that can be served from the command-line.
+- [docker](./examples/docker) — Simple static site that can be served from a Docker container.
 
 ## Contributing
 
-Contributions are welcome!
+PRs welcome!
 
-Want to file a bug, request a feature or contribute some code?
+Want to file a bug or request a feature?
 
 1. Check out the [Code of Conduct](./CODE_OF_CONDUCT.md).
 2. Check for an existing issue corresponding to your bug or feature request.
